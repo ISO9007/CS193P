@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS193P 作业 I：MatchMarkers 中文翻译</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --accent: #c80024;
+      --ink: #202124;
+      --muted: #5f6368;
+      --line: #d8dde3;
+      --paper: #ffffff;
+      --soft: #f6f8fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #eef1f4;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+    }
+
+    main {
+      max-width: 920px;
+      margin: 32px auto;
+      padding: 52px 64px;
+      background: var(--paper);
+      box-shadow: 0 18px 55px rgba(15, 23, 42, 0.12);
+    }
+
+    header {
+      border-top: 12px solid var(--accent);
+      padding-top: 22px;
+      margin-bottom: 34px;
+    }
+
+    .course {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 34px 0 8px;
+      color: var(--accent);
+      font-size: 34px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      margin: 36px 0 12px;
+      padding-top: 18px;
+      border-top: 1px dashed #49bde8;
+      color: var(--accent);
+      font-size: 24px;
+      line-height: 1.3;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    ul, ol {
+      margin: 0 0 18px 1.4em;
+      padding: 0;
+    }
+
+    li {
+      margin: 8px 0;
+      padding-left: 2px;
+    }
+
+    code {
+      padding: 0.1em 0.28em;
+      border-radius: 4px;
+      background: var(--soft);
+      color: #111827;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.94em;
+    }
+
+    .note {
+      margin: 18px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      background: #fff7f8;
+      color: #3d1f25;
+    }
+
+    figure {
+      margin: 22px 0 8px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid #e5e7eb;
+      background: white;
+    }
+
+    figcaption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    footer {
+      margin-top: 42px;
+      padding-top: 16px;
+      border-top: 8px solid var(--accent);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        margin: 0;
+        padding: 28px 22px;
+        box-shadow: none;
+      }
+
+      .course {
+        display: block;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      h2 {
+        font-size: 21px;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      main {
+        margin: 0;
+        max-width: none;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="course">
+        <span>CS193P iOS Application Development</span>
+        <span>Spring 2025</span>
+      </div>
+      <h1>作业 I：MatchMarkers</h1>
+    </header>
+
+    <section>
+      <h2>目标</h2>
+      <p>本次作业的目标，是重新实现前两节课中演示的内容。</p>
+      <p>这主要是为了让你体验在 Xcode 中创建项目，并从零开始输入代码。不要从任何地方复制粘贴代码。请亲手输入，并在输入过程中观察 Xcode 的反应。</p>
+      <p>一定要阅读下面的 <code>Hints</code> 部分！</p>
+      <p>另外，请查看 <code>Evaluation</code> 部分，确保你理解这次作业会根据哪些方面进行评估。</p>
+    </section>
+
+    <section>
+      <h2>截止时间</h2>
+      <p>本作业需要在第 4 次课开始之前提交。</p>
+    </section>
+
+    <section>
+      <h2>材料</h2>
+      <ul>
+        <li>你需要通过 Mac 上的 App Store 安装免费程序 Xcode。早于 Xcode 16 的版本无法使用。</li>
+        <li>为了重新实现 demo，你肯定需要观看前两节课。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>必做任务</h2>
+      <ol>
+        <li>按照课堂演示，让 CodeBreaker 应用正常运行。输入所有代码。不要从任何地方复制粘贴。确保应用能在 Simulator 中成功运行。</li>
+        <li>增强 <code>MatchMarkers</code> 的 <code>#Preview</code>，让它在 <code>MatchMarkers</code> 旁边也显示一些“虚拟 peg”，这样 Preview Canvas 中的 <code>MatchMarkers</code> 会更像处在它的“原生环境”里。可以参考下面的截图来理解大致效果。</li>
+        <li>增强 <code>MatchMarkers</code> 这个 View，让它在收到包含 3 到 6 个 <code>Match</code> 值的数组时都能正常工作。课堂上我们只传入过 4 个。</li>
+        <li>更新你上面构建的 <code>MatchMarkers</code> 的 <code>#Preview</code>，通过尝试多种不同的 <code>Array&lt;Match&gt;</code> 配置来测试你的代码，包括包含 3、4、5、6 个 <code>Match</code> 值的数组，并使用多种 <code>Match</code> 值，也就是 <code>.exact</code>、<code>.inexact</code>、<code>.nomatch</code>。</li>
+        <li>为了正确预览当 <code>Array&lt;Match&gt;</code> 中不是 4 个元素时 <code>MatchMarkers</code> 的样子，<code>#Preview</code> 也需要显示 3、4、5 或 6 个“虚拟” peg。因为每个 peg 都可能对应一个 <code>Match</code>，所以例如如果没有 5 个可匹配的 peg，就不会有 5 个 match marker。</li>
+        <li>确保你的 <code>MatchMarkers</code> 的 <code>#Preview</code> 在深色模式和浅色模式下都有合理表现。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>截图</h2>
+      <ol>
+        <li>本课程提供截图只是为了在你难以想象 <code>Required Tasks</code> 要求你做什么时提供帮助。截图本身不是必做任务的一部分，也就是说你的 UI 不必和下面看到的完全一样。</li>
+        <li>你的 <code>MatchMarkers #Preview</code> 在浅色模式下可能看起来类似这样。</li>
+      </ol>
+      <figure>
+        <img src="assets/day02homework-page-3.png" alt="原 PDF 第 3 页截图，展示 MatchMarkers Preview 在浅色模式下的示例">
+        <figcaption>原 PDF 第 3 页：MatchMarkers #Preview 示例截图</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>提示</h2>
+      <ol>
+        <li>本周我们只是在原型化 UI 的组件，具体来说是 <code>MatchMarkers</code>。下周我们会实现真正的 CodeBreaker 游戏玩法。</li>
+        <li>对于必做任务 2，一种不太美观的方案是在 <code>#Preview</code> 中添加很多重复代码。但你可以考虑创建自己的“俯瞰式 View”，也许叫 <code>MatchMarkersPreview</code> 之类的名字。这个 View 只给 <code>#Preview</code> 使用，用来把虚拟 peg 和 <code>MatchMarkers</code> 一起显示。这样你的 <code>#Preview</code> 就可以只包含对这个“俯瞰式 View”的使用，比如放在一个 <code>VStack</code> 里。换句话说，要“分解”你的 <code>#Preview</code>。没有规则说你不能在 <code>#Preview</code> 中使用任何你想用的 View，包括那些专门为了让 <code>#Preview</code> 更好、更干净而创建的 View。</li>
+        <li>记住，你可以在 <code>@ViewBuilder</code> 中使用 <code>if</code> 语句，例如在 <code>MatchMarkers</code> 的 <code>var body</code> 中。这是提示，不是必做任务。</li>
+        <li>必做任务 3 只需要几行代码就能完成。非常少的几行。</li>
+        <li>必做任务 5 应该只需要改动几行代码。字面意义上的几行。</li>
+        <li>如果你把必做任务 2 和 5 做得好，必做任务 4 可能每个想预览的配置只需要 1 行代码。</li>
+        <li>你很可能会发现必做任务 6 “自动就能工作”，完全不需要你额外做什么。这是 SwiftUI 的特性之一，也就是说它会在你几乎不做额外工作的情况下适配用户选择的环境。不过在开发应用时，我们仍然总是要反复检查这一点。</li>
+        <li>作业 2 会直接建立在你本次作业的工作之上。换句话说，如果你没有成功完成作业 1，就无法完成作业 2 中的必做任务。</li>
+        <li>出于好玩，可以试着让你的代码在真实设备上运行，也就是在 iPhone 上运行。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>要学习的内容</h2>
+      <p>下面是一个不完整的概念列表。本作业旨在让你练习这些概念，或展示你对这些概念的理解。</p>
+      <ol>
+        <li>Xcode 16</li>
+        <li>Swift 6</li>
+        <li>理解 <code>@ViewBuilder</code> 函数或变量的语法，例如 “bag of Lego”</li>
+        <li><code>#Preview</code></li>
+        <li>使用 <code>VStack</code>、<code>HStack</code> 等把 View 组合在一起</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>评估</h2>
+      <p>在本学期所有作业中，目标都是写出高质量代码，使它在没有警告或错误的情况下构建成功，然后测试生成的应用，并不断迭代直到它能正常工作。</p>
+      <p>下面是作业被扣分最常见的原因：</p>
+      <ul>
+        <li>项目无法构建。</li>
+        <li><code>Required Tasks</code> 部分中有一项或多项没有满足。</li>
+        <li>没有理解某个基础概念。</li>
+        <li>项目构建时有警告。</li>
+        <li>代码在视觉上很潦草，难以阅读，例如缩进不一致等。</li>
+        <li>由于缺少注释、变量或方法命名不佳、解法结构糟糕、方法过长等原因，你的解法让阅读代码的人难以理解，甚至无法理解。</li>
+      </ul>
+      <p>学生经常问：“我的代码需要写多少注释？”答案是：你的代码必须能让任何阅读它的人轻松、完整地理解。你可以假设读者知道 SwiftUI API，也知道第 1 和第 2 节课中的 CodeBreaker 游戏代码是如何工作的，但不应该假设他们已经知道你这份作业的解法，或任何其他解法。</p>
+      <p>作业 1 很可能不需要任何注释，因为它主要专注于让你熟悉 Xcode，以及输入、预览和运行代码的过程。</p>
+    </section>
+
+    <footer>
+      <p>中文翻译文件：day02homework.zh.html。截图来自原 PDF 第 3 页。</p>
+    </footer>
+  </main>
+</body>
+</html>

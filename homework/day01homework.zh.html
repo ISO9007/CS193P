@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS193P 阅读作业 I：Swift 入门 中文翻译</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --accent: #c80024;
+      --ink: #202124;
+      --muted: #5f6368;
+      --line: #d8dde3;
+      --paper: #ffffff;
+      --soft: #f6f8fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #eef1f4;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 32px auto;
+      padding: 52px 64px;
+      background: var(--paper);
+      box-shadow: 0 18px 55px rgba(15, 23, 42, 0.12);
+    }
+
+    header {
+      border-top: 12px solid var(--accent);
+      padding-top: 22px;
+      margin-bottom: 34px;
+    }
+
+    .course {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 34px 0 8px;
+      color: var(--accent);
+      font-size: 34px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      margin: 36px 0 12px;
+      padding-top: 18px;
+      border-top: 1px dashed #49bde8;
+      color: var(--accent);
+      font-size: 24px;
+      line-height: 1.3;
+    }
+
+    h3 {
+      margin: 24px 0 8px;
+      color: #3f3f46;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    ul {
+      margin: 0 0 18px 1.4em;
+      padding: 0;
+      columns: 2;
+      column-gap: 42px;
+    }
+
+    li {
+      margin: 7px 0;
+      break-inside: avoid;
+      padding-left: 2px;
+    }
+
+    code {
+      padding: 0.1em 0.28em;
+      border-radius: 4px;
+      background: var(--soft);
+      color: #111827;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.94em;
+    }
+
+    .note {
+      margin: 18px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      background: #fff7f8;
+      color: #3d1f25;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0 24px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .mark-yellow {
+      background: #fff7a8;
+      color: #111827;
+    }
+
+    .mark-red {
+      background: #ffd9d9;
+      color: #111827;
+    }
+
+    .mark-gray,
+    .muted-topic {
+      color: #9ca3af;
+    }
+
+    .muted-topic {
+      text-decoration: none;
+    }
+
+    .single-column {
+      columns: 1;
+    }
+
+    footer {
+      margin-top: 42px;
+      padding-top: 16px;
+      border-top: 8px solid var(--accent);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        margin: 0;
+        padding: 28px 22px;
+        box-shadow: none;
+      }
+
+      .course {
+        display: block;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      h2 {
+        font-size: 21px;
+      }
+
+      ul {
+        columns: 1;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      main {
+        margin: 0;
+        max-width: none;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="course">
+        <span>CS193P iOS Application Development</span>
+        <span>Spring 2025</span>
+      </div>
+      <h1>阅读作业 I：Swift 入门</h1>
+    </header>
+
+    <section>
+      <h2>目标</h2>
+      <p>我们第一次阅读作业的目标，是开始熟悉一门你必须学习的新语言：Swift。本次作业主要覆盖一些基础内容，例如变量和控制流、方法和属性、数组和字符串。不过请注意，Swift 在这些基础内容上也有一些很强大的设计，例如函数的带标签参数、支持模式匹配的 <code>switch</code> 语句、函数作为一等类型、在同一种编程语言中混合面向对象和函数式编程技术等。</p>
+      <p>下面列出了你必须阅读的《Swift Programming Language》文档中的章节。这些内容做了颜色标记，帮助你更高效地消化信息。例如，灰色主题表示本次不需要阅读，也就是说你会在下一次或再下一次阅读。其他颜色标记的含义会因你对不同编程语言的经验而有所不同。</p>
+      <p>随着时间推移，学习一门新语言应该会逐渐变成你习以为常的事情。大多数资深计算机科学从业者可能至少知道十几门编程语言，有些人甚至知道几十门。如果你已经是这样的老手，也就是你已经了解十几门或更多编程语言，那么这些颜色标记对你来说意义不大。你会很容易识别这门语言的各种元素，只需要快速浏览以弄清 Swift 的具体语法。</p>
+      <p>有点奇怪的是，如果 Swift 只是你学过的第二门编程语言，那么这些颜色标记对你可能也没有太大意义，因为你大概需要认真阅读所有章节，才能理解这门新语言。</p>
+      <p>但如果你的经验介于两者之间，那么颜色标记可能会有帮助。没有高亮的主题是几乎所有编程语言中都能找到的常规特性，Swift 对这些特性的实现没有特别棘手之处。黄色主题可能会让你觉得有些不寻常，具体取决于你的经验，因此阅读时要多注意。红色主题非常重要，或者除非你是前面提到的老手，否则很可能对你来说是全新的。这些章节需要仔细、认真地阅读。</p>
+      <div class="legend" aria-label="颜色标记说明">
+        <span>无高亮：常规主题</span>
+        <span class="mark-yellow">黄色：需要多注意</span>
+        <span class="mark-red">红色：非常重要或可能全新</span>
+        <span class="mark-gray">灰色：本次暂不要求阅读</span>
+      </div>
+      <p>本课程前几周会有阅读作业，之后就没有了。本周的阅读量比其他几周稍大，一方面是因为学期初的编程作业相对简单，因此不会像平常那样花时间；另一方面是因为虽然本周要读的内容很多，但其中相当一部分都是非常基础的内容。当然，其中也混有一些更复杂的内容，所以要留心。另外，这次作业你会多几天时间完成。</p>
+    </section>
+
+    <section>
+      <h2>截止时间</h2>
+      <p>请在第 4 次课开始之前读完下面引用的所有材料。</p>
+      <p>请预留足够时间，因为这里的阅读量相当大。这是阅读量最大的一周，但其中也有最多你可能已经从其他语言中熟悉的内容，所以希望本周有些内容你可以相对快速地读过。不过再次提醒，遇到黄色或红色高亮主题时，请稍微放慢速度。</p>
+    </section>
+
+    <section>
+      <h2>材料</h2>
+      <p>在正式开始深入阅读之前，建议你先滚动浏览一下这份文档，大致估算需要为它安排多少时间。作为快速参考，除了 <code>A Swift Tour</code> 和 <code>Swift API Guidelines</code> 之外，你还需要阅读 <code>Swift Programming Language</code> 左侧 <code>Language Guide</code> 下前 14 章中的大部分内容，大约 11.5 章，从 <code>The Basics</code> 到 <code>Initialization</code> 的前半部分，不包括 <code>Subscripts</code> 或 <code>Inheritance</code>。</p>
+    </section>
+
+    <section>
+      <h2>Playgrounds</h2>
+      <p>文档中有许多灰色框，标题为 “Experiment”。如果你愿意探索，可以在 Mac 或 iPad 上下载 Swift Playgrounds 应用，把 <code>Experiment</code> 框中提到的代码复制粘贴进去，然后尝试完成它建议的实验。</p>
+      <p>只需要打开 Swift Playgrounds，在左下角 <code>More Playgrounds</code> 区域中 <code>Playground</code> 上方点击加号，然后双击它创建的 <code>My Playground</code>。进入之后，你可以直接输入或复制粘贴任何想试的代码，并点击右下角的 “Run My Code”。变量的值和函数调用的结果会以小图标形式显示在右侧。</p>
+    </section>
+
+    <section>
+      <h2>Swift Programming Language</h2>
+      <p>不要略过任何 <code>NOTE</code> 文本，也就是灰色框中的注释，因为其中很多内容都相当重要。不过，如果某个 <code>NOTE</code> 提到 Objective-C 或 bridging，可以忽略。</p>
+      <p>如果正文中有链接指向另一个章节，除非链接到的内容也是本周阅读作业的一部分，否则你不必点进去阅读。</p>
+      <p>每个主要章节开头的概述都要读。例如，在 <code>The Basics</code> 中，一定要阅读以 “Swift provides many fundamental data types...” 开头的那部分。</p>
+      <p>先从 <code>Language Guide</code> 上方的 <code>A Swift Tour</code> 开始。它是帮助你对 Swift 语言“找到方向”的好地方。前几周课程中，我们至少会接触到下面列出的这些章节中的所有主题，而这里是进一步了解它们的好地方。这部分涵盖了 Swift 的大部分核心内容。剩余阅读，无论是本周还是接下来几周，都会继续深入这些主题。</p>
+      <ul>
+        <li>Simple Values</li>
+        <li>Control Flow</li>
+        <li class="mark-yellow">Functions and Closures</li>
+        <li>Objects and Classes</li>
+        <li>Enumerations and Structures</li>
+        <li class="mark-gray">Concurrency</li>
+        <li class="mark-gray">Protocols and Extensions</li>
+        <li class="mark-gray">Error Handling</li>
+        <li class="mark-yellow">Generics</li>
+      </ul>
+      <p><code>Protocols and Extensions</code> 这一节虽然标成灰色，但它非常重要，重要到我们下周会在课堂幻灯片中讲它，这也是为什么这次不要求你现在阅读这一节。话虽如此，你当然可以提前阅读这份文档中的任何内容；我们只是试图把你的整体阅读量控制在可管理范围内。如果你想试着阅读这一节，并把它和目前的 demo 联系起来，可以知道 <code>View</code>、<code>Identifiable</code> 和 <code>Equatable</code> 都是协议。当我们在课堂上谈到 “constrains and gains” 或 “behaves like” 时，我们说的就是协议。</p>
+      <p>在 <code>Language Guide</code> 区域中，请阅读以下章节中的以下小节。为了在本学期后续课程中继续跟上进度，理解这些章节中的信息很重要，所以不要敷衍这项阅读。</p>
+      <p>顺便说一下，Unicode 变量名和常量名，例如 <code>🔥</code>，可以很有趣，但你需要为代码中所有命名的质量和可读性负责，所以请明智地命名。另外，在 Swift 中我们不会在每行末尾加分号；分号只用于在同一行上分隔两个语句，而且这种情况即便有也非常少见。</p>
+    </section>
+
+    <section>
+      <h2>The Basics</h2>
+      <p>请注意，在 <code>Swift Programming Guide</code> 中，一个完整标题，例如 <code>Constants and Variables</code>，和它下面的小标题，例如 <code>Declaring Constants and Variables</code> 或 <code>Type Annotations</code>，在字体样式上的差别并不明显。这里列出一个完整标题时，意思是“整个章节，包括它的所有子章节”。所以当你在下面看到 <code>Constants and Variables</code> 时，它包括所有子章节：<code>Declaring Constants and Variables</code>、<code>Type Annotations</code>、<code>Naming Constants and Variables</code> 以及 <code>Printing Constants and Variables</code>。下一个完整标题是 <code>Comments</code>。</p>
+      <ul>
+        <li>Constants and Variables</li>
+        <li>Comments</li>
+        <li>Semicolons</li>
+        <li>Integers</li>
+        <li>Floating-Point Numbers</li>
+        <li class="mark-yellow">Type Safety and Type Inference</li>
+        <li>Numeric Literals</li>
+        <li class="mark-yellow">Numeric Type Conversion</li>
+        <li>Type Aliases</li>
+        <li>Booleans</li>
+        <li class="mark-yellow">Tuples</li>
+        <li class="mark-gray">Optionals</li>
+        <li class="mark-gray">Error Handling</li>
+        <li class="mark-gray">Assertions and Preconditions</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Basic Operators</h2>
+      <p>三元条件运算符虽然非常简单，但在 SwiftUI 中经常使用，通常作为 <code>View</code> 修饰器的参数。这就是它在这里被高亮的原因。</p>
+      <ul>
+        <li>Terminology</li>
+        <li>Assignment Operator</li>
+        <li>Arithmetic Operators</li>
+        <li>Compound Assignment Operators</li>
+        <li>Comparison Operators</li>
+        <li class="mark-yellow">Ternary Conditional Operator</li>
+        <li class="mark-gray">Nil-Coalescing Operator</li>
+        <li class="mark-yellow">Range Operators</li>
+        <li>Logical Operators</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Strings and Characters</h2>
+      <p>Swift 中的字符串非常强大，因为它们可以表示地球上几乎任何语言的文本，这也带来了一些可以理解的复杂性。因此，这一节可能会比较耗时。另一方面，如果你不是 Swift 字符串专家，通常也不会立刻陷入困境。所以如果你时间紧张，也可以把这一节推迟到下周。</p>
+      <p>你还会看到文档中提到字符串是一种 “value type”。这是一个重要概念，也是本周阅读的一部分，见本文档后面的相关内容。</p>
+      <ul>
+        <li>String Literals</li>
+        <li>Initializing an Empty String</li>
+        <li>String Mutability</li>
+        <li>Strings Are Value Types</li>
+        <li>Working with Characters</li>
+        <li>Concatenating Strings and Characters</li>
+        <li class="mark-yellow">String Interpolation</li>
+        <li>Unicode</li>
+        <li class="mark-yellow">Counting Characters</li>
+        <li class="mark-red">Accessing and Modifying a String</li>
+        <li class="mark-yellow">Substrings</li>
+        <li>Comparing Strings</li>
+        <li class="mark-gray">Unicode Representations of Strings</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Collection Types</h2>
+      <p><code>Array</code>，以及程度稍低一些的 <code>Dictionary</code>，是整个 Swift 中最强大、最常用的结构体之一。这是你应该尽早掌握的类型。你不仅要仔细阅读下面这些章节，也要充分熟悉 <code>Array</code> 的文档页面。<code>Array</code> 有大量内置能力；如果你知道它们存在，之后可以节省很多编码时间。</p>
+      <p>请注意，这一节一开始讨论的是可变性。它指的只是某个东西存储在 <code>let</code> 变量中，也就是不可变，或者说“常量”；还是存储在 <code>var</code> 变量中，也就是可变，或者说“变量”。Swift 对可变性的处理非常强大而优雅。</p>
+      <ul>
+        <li class="mark-yellow">Mutability of Collections</li>
+        <li class="mark-yellow">Arrays</li>
+        <li class="mark-gray">Sets</li>
+        <li class="mark-gray">Performing Set Operations</li>
+        <li class="mark-yellow">Dictionaries</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Control Flow</h2>
+      <p>这一节，以及下一节关于函数的内容，文字很多，但大部分内容你会非常熟悉，可能除了黄色部分之外。因此它实际读起来应该不会像第一眼看上去那么耗时。</p>
+      <ul>
+        <li>For-In Loops</li>
+        <li>While Loops</li>
+        <li>Conditional Statements</li>
+        <li>If</li>
+        <li class="mark-yellow">Switch</li>
+        <li class="mark-yellow">No Implicit Fallthrough</li>
+        <li>Interval Matching</li>
+        <li>Tuples</li>
+        <li class="mark-gray">Value Bindings</li>
+        <li class="mark-gray">Where</li>
+        <li>Compound Cases</li>
+        <li>Control Transfer Statements</li>
+        <li class="mark-gray">Continue</li>
+        <li class="mark-yellow">Break</li>
+        <li>Fallthrough</li>
+        <li class="mark-gray">Labeled Statements</li>
+        <li class="mark-yellow">Early Exit</li>
+        <li>Deferred Actions</li>
+        <li class="mark-gray">Checking API Availability</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Functions</h2>
+      <p>函数在 Swift 中是普通的一等类型，这一点对 Swift 的设计至关重要。</p>
+      <ul>
+        <li>Defining and Calling Functions</li>
+        <li>Function Parameters and Return Values</li>
+        <li class="mark-yellow">Function Argument Labels and Parameter Names</li>
+        <li class="mark-yellow">Specifying Argument Labels</li>
+        <li>Omitting Argument Labels</li>
+        <li>Default Parameter Values</li>
+        <li class="mark-gray">Variadic Parameters</li>
+        <li class="mark-gray">In-Out Parameters</li>
+        <li class="mark-yellow">Function Types</li>
+        <li>Nested Functions</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Closures</h2>
+      <p>在 demo 中，我们把闭包称为“行内函数”，并展示了本周要求阅读的两个小节中涵盖的大部分内容。但闭包不只是“行内函数”，它们更强大。我们会在下一次阅读作业中阅读灰色部分的内容。</p>
+      <ul>
+        <li class="mark-yellow">Closure Expressions</li>
+        <li class="mark-yellow">Trailing Closures</li>
+        <li class="mark-gray">Capturing Values</li>
+        <li class="mark-gray">Closures are Reference Types</li>
+        <li class="mark-gray">Escaping Closures</li>
+        <li class="mark-gray">Autoclosures</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Enumerations</h2>
+      <p>枚举在 Swift 中重要得出人意料，所以一定要非常注意这一章。</p>
+      <ul>
+        <li>Enumeration Syntax</li>
+        <li>Matching Enumeration Values in a Switch Statement</li>
+        <li>Iterating over Enumeration Cases</li>
+        <li class="mark-yellow">Associated Values</li>
+        <li class="mark-gray">Raw Values</li>
+        <li class="mark-gray">Recursive Enumerations</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Structures and Classes</h2>
+      <p>理解结构体是值类型、会到处被复制，并且通常是不可变的，是适应 Swift 中函数式编程方法的基础。这也是为什么该部分在这里用红色高亮。你可能来自的那些语言通常基于面向对象的引用类型。</p>
+      <ul>
+        <li>Comparing Structures and Classes</li>
+        <li class="mark-red">Structures and Enumerations Are Value Types</li>
+        <li>Classes Are Reference Types</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Properties</h2>
+      <p>我们在 demo 中几次见过计算属性，例如 <code>var body</code>。请注意，这里的 <code>Computed Properties</code> 一节会讲如何创建也可以被设置的计算属性，也就是不是只读的计算属性。我们可以等到下周再看这一点，所以它在这里是灰色的。</p>
+      <p>不知道为什么，<code>Type Properties</code> 和 <code>Type Methods</code> 会让很多学生困惑，也就是说他们会把它们和普通的实例函数、实例属性混淆。你可以把它们理解为与某个类型关联并由该类型命名空间限定的“全局”属性和函数。</p>
+      <ul>
+        <li>Stored Properties</li>
+        <li class="mark-gray">Computed Properties</li>
+        <li class="mark-gray">Property Observers</li>
+        <li class="mark-gray">Property Wrappers</li>
+        <li>Global and Local Variables</li>
+        <li class="mark-yellow">Type Properties</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Methods</h2>
+      <ul>
+        <li>Instance Methods</li>
+        <li>The self Property</li>
+        <li class="mark-yellow">Modifying Value Types from Within Instance Methods</li>
+        <li class="mark-gray">Assigning to self Within a Mutating Method</li>
+        <li class="mark-yellow">Type Methods</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="muted-topic">Subscripts</h2>
+    </section>
+
+    <section>
+      <h2 class="muted-topic">Inheritance</h2>
+      <p>我们基本会略过 Swift 中的面向对象编程，因为除了 <code>@Observable</code> 之外，你在 SwiftUI 中不会经常使用它。</p>
+    </section>
+
+    <section>
+      <h2>Initialization</h2>
+      <ul>
+        <li>Setting Initial Values for Stored Properties</li>
+        <li class="mark-red">Customizing Initialization</li>
+        <li>Default Initializers</li>
+        <li class="mark-gray">Initializer Delegation for Value Types</li>
+        <li class="mark-gray">Class Inheritance and Initialization</li>
+        <li class="mark-gray">Failable Initializers</li>
+        <li class="mark-gray">Required Initializers</li>
+        <li class="mark-gray">Setting a Default Property Value with a Closure or Function</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Swift API Guidelines</h2>
+      <p>请完整阅读这份 <code>Swift API Guidelines</code> 文档。</p>
+      <p>由于你对 Swift 完全陌生，这份文档中的一些内容一开始会有点难以完全吸收。但熟悉这份文档中包含的内容，对于写出好的 Swift 代码至关重要。因此，本周的目标是知道里面有什么，而不是一开始就完全掌握这些指南。随着学期推进，你最终应该成为给属性、方法以及其他 Swift 构造命名的专家。这需要你经常回头查阅这份文档。</p>
+      <p>请务必点击所有写着 “MORE DETAIL” 的地方。</p>
+      <p>请特别注意 “Write a documentation comment” 这一节。</p>
+      <p>请特别注意 “Follow case conventions” 这一节。</p>
+      <p>请特别注意整个 “Argument Labels” 章节。</p>
+      <p>你现在可以忽略提到协议的要点。等我们下周学习协议之后，记得再回来看这份文档。</p>
+      <p>你也可以忽略最后一节 <code>Special Instructions</code> 中最后一个小节 “Take extra care with unconstrained polymorphism”。我们不会使用 <code>Any</code> 和 <code>AnyObject</code> 类型。</p>
+    </section>
+
+    <footer>
+      <p>中文翻译文件：day01homework.zh.html。来源 PDF：day01homework.pdf，共 11 页。</p>
+    </footer>
+  </main>
+</body>
+</html>
