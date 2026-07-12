@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS193P 作业 II：CodeBreaker（中文翻译）</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --stanford-red: #c90025;
+      --rule-blue: #1fa7df;
+      --paper: #fff;
+      --ink: #111;
+      --serif: Baskerville, "Baskerville MT", "Songti SC", STSong, SimSun, serif;
+      --display: "Big Caslon", Baskerville, "Songti SC", STSong, serif;
+      --sans: "Gill Sans", "Gill Sans MT", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: Menlo, Monaco, Consolas, "SFMono-Regular", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      background: #e8eaed;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 18.5px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .document { padding: 28px 0 48px; }
+
+    .page {
+      position: relative;
+      width: 816px;
+      height: 1056px;
+      margin: 0 auto 28px;
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 10px 34px rgba(0, 0, 0, .16);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .page:last-child { page-break-after: auto; break-after: auto; }
+
+    .running-head,
+    .running-foot {
+      position: absolute;
+      left: 96px;
+      width: 624px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1px;
+      background: var(--stanford-red);
+      color: #fff;
+      font: 11px/14px var(--sans);
+      text-transform: uppercase;
+      letter-spacing: .005em;
+    }
+
+    .running-head { top: 47px; }
+    .running-foot { bottom: 48px; }
+
+    .content {
+      position: absolute;
+      inset: 94px 96px 78px;
+    }
+
+    .page-title {
+      margin: 24px 0 34px;
+      color: var(--stanford-red);
+      font: 400 58px/1.18 var(--display);
+      letter-spacing: -.025em;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      padding-top: 7px;
+      border-top: 1px dashed var(--rule-blue);
+      color: var(--stanford-red);
+      font: 700 19px/1.15 var(--sans);
+    }
+
+    p { margin: 0 0 16px; }
+
+    strong { font-weight: 700; }
+    em { font-style: italic; }
+
+    code {
+      font-family: var(--mono);
+      font-size: .82em;
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+
+    .section { margin-bottom: 26px; }
+    .section.tight { margin-bottom: 20px; }
+    .section p { margin-left: 13px; }
+    .section h2 + p { margin-top: 0; }
+
+    .tasks,
+    .challenge {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: item;
+    }
+
+    .tasks li,
+    .challenge > li {
+      position: relative;
+      margin: 0 0 14px 34px;
+      counter-increment: item;
+    }
+
+    .tasks li::before,
+    .challenge > li::before {
+      content: counter(item) ".";
+      position: absolute;
+      left: -34px;
+      width: 24px;
+      text-align: right;
+    }
+
+    .compact { font-size: 17px; line-height: 1.38; }
+    .compact p { margin-bottom: 13px; }
+    .compact .tasks li { margin-bottom: 12px; }
+
+    .small { font-size: 16.2px; line-height: 1.36; }
+    .small p { margin-bottom: 12px; }
+
+    .tiny { font-size: 15.8px; line-height: 1.32; }
+    .tiny p { margin-bottom: 11px; }
+
+    .evaluation {
+      margin: 0 0 18px 32px;
+      padding: 0;
+    }
+
+    .evaluation li { margin: 0 0 8px; }
+
+    .screenshot-copy { font-size: 19px; line-height: 1.45; }
+
+    .phone-shot {
+      display: block;
+      width: 343px;
+      height: auto;
+      margin: 30px auto 0;
+    }
+
+    .code-line {
+      margin-left: 26px;
+      font-family: var(--mono);
+      font-size: 15.5px;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 840px) {
+      body { overflow-x: auto; }
+      .document { width: 816px; padding: 12px 0 24px; }
+      .page { margin-bottom: 12px; }
+    }
+
+    @page { size: Letter; margin: 0; }
+
+    @media print {
+      body { background: #fff; }
+      .document { padding: 0; }
+      .page { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <article class="page" aria-label="第 1 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h1 class="page-title">作业 II：<br>CodeBreaker</h1>
+
+        <section class="section">
+          <h2>目标</h2>
+          <p>本次作业的目标，是继续重现第 4 讲之前课堂演示过的内容（现在我们已经加入了游戏逻辑），然后在此基础上做一些更大的增强。</p>
+          <p>重要的是，在重现课堂 demo 的每一步时，你都要理解自己正在做什么，这样才能为后面的增强任务做好准备。</p>
+          <p>这仍然是在练习：在 Xcode 中创建项目，并从零开始手动输入代码。<strong>不要从任何地方复制/粘贴任何代码。</strong>请亲手输入，并在输入过程中观察 Xcode 会如何响应。</p>
+          <p>一定要查看下面的“提示”部分！</p>
+          <p>另外，也请看看“评分标准”部分中的最新说明，确保你理解这次作业会按照什么来评估。</p>
+        </section>
+
+        <section class="section tight">
+          <h2>截止时间</h2>
+          <p>本次作业需在第 6 次课开始之前完成。</p>
+        </section>
+
+        <section class="section tight">
+          <h2>材料</h2>
+          <p>Xcode（如作业 1 中所说明）。</p>
+          <p>你完成的作业 1 解答。</p>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 1 页，共 7 页</span><span>作业 II：CodeBreaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 2 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <h2>必做任务</h2>
+        <ol class="tasks">
+          <li>让 CodeBreaker 游戏按照课堂演示那样运行起来（到第 4 讲为止）。把所有代码都手动输入。不要从任何地方复制/粘贴。</li>
+          <li>忽略用户已经尝试过的猜测，或完全没有选择任何 peg 的猜测。</li>
+          <li>在你的 UI 中加入一个“Restart Game”按钮（放在哪里由你判断），它会重置 UI 并开始一局全新的游戏。</li>
+          <li>让 CodeBreaker 游戏中的 peg 数量可配置（3 到 6 个 peg），而不是固定为 4 个。你在作业 1 中已经修好了 <code>MatchMarkers</code> 来支持这一点，现在请让它和其余代码一起正常工作。</li>
+          <li>既然现在支持 3 到 6 个 peg，Restart Game 就应该在 3 到 6 之间随机选择 peg 数量。</li>
+          <li>进一步增强 CodeBreaker，使它可以玩两种不同类型的游戏：一种是 peg 为彩色圆点的游戏（当前版本），另一种是每个 peg 都是 emoji（也就是 <code>String</code>）的游戏。</li>
+          <li>你的 CodeBreaker emoji 版本可以从任意一组你选择的 emoji 中取值。表情很好玩，不过运动、动物或交通工具也都是不错的想法。emoji 集合的大小可以和 peg 数量（3、4、5 或 6）绑定，也可以不绑定。由你决定。</li>
+          <li>除了像必做任务 6 那样随机选择 peg 数量之外，Restart Game 还必须随机选择两种游戏类型之一（emoji 或彩色圆点）。</li>
+          <li>在你的解答中，至少在某处使用一个 <code>static var</code> 或 <code>func</code>。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 2 页，共 7 页</span><span>作业 II：CodeBreaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 3 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small">
+        <h2>提示</h2>
+        <ol class="tasks">
+          <li>必做任务 3 的初始版本，大概只需要四行左右的代码就能实现。</li>
+          <li>有点出人意料的是，必做任务 4 几乎不需要改动你的 UI（除了改变创建 CodeBreaker 游戏的方式，因为现在需要把某局游戏应有的 peg 数量参数化）。部分原因是你在作业 1 中已经做过相关工作，另一部分原因则只是 <code>ForEach</code> 很强大。</li>
+          <li>你的 Model 中的 <code>init</code> 函数现在很可能需要接收游戏中的 peg 数量。</li>
+          <li>为了实现必做任务 5，你需要生成一个 3 到 6 之间的随机数。可以用 <code>Int.random(in: 3...6)</code>。</li>
+          <li><code>Peg</code> 目前被 <code>typealias</code> 成 <code>Color</code>。现在 peg 既可能是 emoji（<code>String</code>），也可能是 <code>Color</code>，所以这样不行了。一个简单方案？让 <code>Peg</code> 成为 <code>String</code>，并用名字表示颜色（例如 <code>"red"</code> 或 <code>"blue"</code>）。如果某个 <code>Peg</code>（<code>String</code>）不是你支持的颜色之一，就把它当成 emoji。</li>
+          <li>如果 <code>Peg</code> 不再是 <code>Color</code>，你的 Model 就可以改回 <code>import Foundation</code>，不用再使用当 <code>Peg</code> 是 <code>Color</code> 时被迫引入的 <code>import SwiftUICore</code>（或 <code>SwiftUI</code>）。因为 Model 本来就应该独立于 UI，不导入任何 UI 模块会让人舒服得多，也能降低我们把本该属于 UI 的代码放进 Model 的可能性。</li>
+          <li>你很可能会希望显示 emoji 的 <code>Text</code> 尺寸是灵活的（就像彩色圆点 peg 一样）。一个简单做法是让这个 <code>Text</code> 成为 <code>Circle</code>（或 <code>Rectangle</code>）的 <code>.overlay</code>，并给它应用 <code>.font(.system(size: 120))</code> 和 <code>.minimumScaleFactor(9/120)</code> 修饰器。这样 <code>Text</code> 会为自己选择一个不大于 120 点、不小于 9 点的字体。并且因为它是 <code>.overlay</code>，它的布局会完全继承自尺寸灵活的父视图（例如 <code>Circle</code>），所以它本身也会在尺寸上变得灵活。</li>
+          <li>要在两种游戏类型（emoji 或彩色圆点）之间随机选择，你大概会想要一个随机的 <code>Bool</code> 值。<code>Bool.random()</code> 会给你一个。</li>
+          <li>你可以只支持目前一直在用的颜色（<code>"blue"</code>、<code>"green"</code>、<code>"red"</code>、<code>"yellow"</code>），但稍微更扩展一点的方案，是把自己限制在 <code>Color</code> 结构体内置的颜色范围内。下面的 Challenge Mode 会说明你可以怎么做。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 3 页，共 7 页</span><span>作业 II：CodeBreaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 4 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h2>截图</h2>
+        <p class="screenshot-copy">截图不是必做任务（它们更像是提示）。你的 UI 不必长成这样。这里提供截图，只是为了防止上面的文字描述让你完全摸不着头脑。这张截图展示的是 5 个 peg 的“emoji”版本游戏。显然，这只是解答的一部分。你还需要支持 3、4、6 个 peg 的版本，当然也必须支持原来的彩色 peg 版本。Restart 按钮应该随机选择所有这些组合中的某一种。</p>
+        <img class="phone-shot" src="assets/day04homework-screenshot.png" alt="CodeBreaker emoji 版本游戏截图，包含五列 emoji peg、Guess 按钮、匹配标记和 Restart 按钮">
+      </div>
+      <footer class="running-foot"><span>第 4 页，共 7 页</span><span>作业 II：CodeBreaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 5 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h2>评分标准</h2>
+        <p>在本季度的所有作业中，目标都是写出高质量代码：代码可以无警告、无错误地构建，然后对生成的应用进行测试，并不断迭代，直到它能正常运行。</p>
+        <p>下面是作业最常见的扣分原因：</p>
+        <ul class="evaluation">
+          <li>项目无法构建。</li>
+          <li>“必做任务”部分中有一个或多个条目没有满足。</li>
+          <li>某个基础概念没有被理解。</li>
+          <li>项目不能在无警告的情况下构建。</li>
+          <li>代码在视觉上凌乱，难以阅读（例如缩进不一致等）。</li>
+          <li>由于缺少注释、变量/方法命名不佳、解法结构不佳、方法过长等原因，你的解答让读代码的人难以（甚至不可能）理解。</li>
+        </ul>
+        <p>学生经常会问：“我的代码到底需要写多少注释？”答案是：你的代码必须能让任何阅读它的人轻松、完整地理解。你可以假设读者了解 iOS API，也了解课堂上 CodeBreaker 游戏代码的工作方式；但不应该假设他们已经知道你（或任何人）对这份作业的解法。</p>
+      </div>
+      <footer class="running-foot"><span>第 5 页，共 7 页</span><span>作业 II：CodeBreaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 6 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content tiny">
+        <h2>Challenge Mode</h2>
+        <p>Challenge Mode 是一个机会，让你扩展本周学到的内容，并用更难的练习挑战自己。强烈建议你每周都尝试其中一个或多个，以便从这门课中获得更多收获。</p>
+        <ol class="challenge">
+          <li><p>2 分。借助 AI 的帮助，扩展你的游戏能够支持的颜色范围：除了 <code>"blue"</code>、<code>"red"</code>、<code>"green"</code> 和 <code>"yellow"</code> 之外，至少要包含 <code>Color</code> 结构体中的所有内置颜色（例如 <code>Color.brown</code>、<code>Color.pink</code> 等）。</p>
+          <p>遗憾的是，<code>Color</code> 结构体并不支持通过名字访问它的内置颜色，但你可以请你选择的某个 AI 写一些代码，根据颜色名字得到一个 <code>Color</code>（以及反过来）。比如这样问：<span lang="en">"create a failable initializer for Color which takes a color name and translates it into one of Color's built-in static colors"</span>。希望你的 AI 会给你一段 <code>Color</code> 结构体的 extension，其中包含一个能解决问题的 <code>init?</code>！</p>
+          <p>你也可以继续追问它：<span lang="en">"now create an Optional var called name which does the inverse"</span>（虽然完成这个 Challenge Mode 并不绝对需要这样的东西，但在某些解法中它可能会派上用场）。</p>
+          <p>一定要检查 AI 的成果！有时候它会产生幻觉，编造出实际上并不是 <code>Color</code> 中 <code>static var</code> 的颜色。另外，有些 AI 比另一些更聪明，所以如果你从某一个那里得不到想要的结果，可以试试别的。</p>
+          <p>如果你的 AI 成功完成了这件事，它有希望让 <code>init</code>（以及 <code>name</code> var）返回 Optional（因为当某个名字没有对应的 <code>Color</code>，或反过来没有对应名字时，它需要返回 <code>nil</code>）。这是一个很好的机会，可以确认你理解 Optional 是如何工作的。</p>
+          <p>如果一切顺利，并且取决于你的 AI 写出了什么，你应该能写出类似这样的代码……</p>
+          <p class="code-line">if let color = Color(name: peg) { /*color pegs*/ } else { /*emoji pegs*/ }.</p>
+          <p>或者也许是这样？ <code>let color = Color(name: peg) ?? .clear</code></p>
+          <p>通过在游戏重启时使用不同颜色来测试你的代码。如果你能做到这一点，那么你已经很好地走在完成下一个 Challenge Mode 的路上了……</p></li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 6 页，共 7 页</span><span>作业 II：CodeBreaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 7 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small">
+        <ol class="challenge" start="2">
+          <li><p>1 分。当你重启游戏时，从多种不同的 emoji（或颜色）集合中选择一组来使用（我们把这称为游戏的“主题”）。例如，某次重启时你可能使用表情主题（😀 🤪 🥳 😨），下一次使用大地色系，再下一次使用交通工具 emoji（🚗 🚲 🛩 ⛵），再下一次使用标准颜色，等等。</p></li>
+          <li><p>1 分。为上面 Challenge Mode 2 中加入的各种主题命名（例如 “Faces” 或 “Earth Tones”），并把这个名字作为游戏标题显示在屏幕上的某个位置。</p>
+          <p>对于这一项，你可能会发现自己想构建一个同时使用 <code>Array</code> 和 <code>Dictionary</code> 的数据结构；不过你需要理解 Optional 才能使用 <code>Dictionary</code>，因为在 <code>Dictionary</code> 中查找某个东西会返回一个 Optional（这很合理，因为有时候你想从 <code>Dictionary</code> 里取出的东西可能根本不在里面）。</p>
+          <p>这个 Challenge Mode 大概只需要几行代码（不包括把各种 emoji/颜色主题加载进去的那些代码行）。</p>
+          <p>你可能必须把其中一个主题硬编码为应用启动时首先显示的主题（除非你想真的大胆一点，试着弄明白如何使用 <code>.onAppear</code> 在游戏第一次出现在屏幕上时随机选择一个主题）。</p>
+          <p>这里还可以采用一个额外的简化假设：至少有一个众所周知的主题保证始终存在（也就是应用首次启动时出现的那个主题）。有了这些假设，你就可以更频繁地使用“强制解包”（也就是 <code>!</code>），而不必总是检查一次 <code>Dictionary</code> 查找返回的值是不是 <code>nil</code>。例如，你可以假设 <code>themes.keys.randomElement()</code> 永远不会返回 <code>nil</code>（如果 <code>themes</code> 是你的主题 <code>Dictionary</code>），并且 <code>themes["Mastermind"]!</code> 永远不会崩溃。否则，当你的游戏第一次出现而又没有可用主题时，你可能会陷入一点麻烦！</p></li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 7 页，共 7 页</span><span>作业 II：CodeBreaker</span></footer>
+    </article>
+  </main>
+</body>
+</html>

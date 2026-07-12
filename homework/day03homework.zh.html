@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS193P 阅读作业 II：函数式编程（中文翻译）</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --stanford-red: #c90025;
+      --link-blue: #0000a8;
+      --rule-blue: #2ba8df;
+      --muted: #b5b5b5;
+      --yellow: #fff6a6;
+      --pink: #ffd0cc;
+      --paper: #fff;
+      --ink: #111;
+      --serif: Baskerville, "Baskerville MT", "Songti SC", STSong, SimSun, serif;
+      --display: "Big Caslon", Baskerville, "Songti SC", STSong, serif;
+      --sans: "Gill Sans", "Gill Sans MT", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --list: Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: Menlo, Monaco, Consolas, "SFMono-Regular", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      background: #e8eaed;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 15.5px;
+      line-height: 1.52;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .document { padding: 28px 0 48px; }
+
+    .page {
+      position: relative;
+      width: 816px;
+      height: 1056px;
+      margin: 0 auto 28px;
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 10px 34px rgba(0, 0, 0, .16);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .page:last-child { page-break-after: auto; break-after: auto; }
+
+    .running-head,
+    .running-foot {
+      position: absolute;
+      left: 96px;
+      width: 624px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1px;
+      background: var(--stanford-red);
+      color: #fff;
+      font: 11px/14px var(--sans);
+      text-transform: uppercase;
+      letter-spacing: .005em;
+    }
+
+    .running-head { top: 47px; }
+    .running-foot { bottom: 48px; }
+
+    .content {
+      position: absolute;
+      inset: 94px 96px 78px;
+    }
+
+    .page-title {
+      margin: 0 0 30px;
+      color: var(--stanford-red);
+      font: 400 49px/1.16 var(--display);
+      letter-spacing: -.025em;
+    }
+
+    h2.section-label {
+      margin: 0 0 8px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--rule-blue);
+      color: var(--stanford-red);
+      font: 700 17px/1.18 var(--sans);
+    }
+
+    h2.chapter {
+      margin: 0 0 22px;
+      color: var(--link-blue);
+      font: 400 22px/1.1 var(--list);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    h2.red-heading {
+      margin: 0 0 22px;
+      padding-top: 7px;
+      border-top: 1px dashed var(--rule-blue);
+      color: var(--stanford-red);
+      font: 700 18px/1.15 var(--sans);
+    }
+
+    p { margin: 0 0 16px; }
+
+    a { color: var(--link-blue); text-decoration: underline; }
+
+    code {
+      font-family: var(--mono);
+      font-size: .82em;
+      letter-spacing: .01em;
+    }
+
+    strong { font-weight: 700; }
+    em { font-style: italic; }
+
+    .group { margin-bottom: 23px; }
+    .group.tight { margin-bottom: 17px; }
+    .section-label + p { margin-left: 13px; }
+
+    .reading-list {
+      margin: 6px 0 24px 48px;
+      padding: 0;
+      list-style: none;
+      font: 16px/1.25 var(--list);
+    }
+
+    .reading-list li { width: max-content; max-width: 100%; }
+    .reading-list .level-2 { margin-left: 48px; }
+    .reading-list .skip { color: var(--muted); }
+    .reading-list .important { background: var(--yellow); }
+    .reading-list .new { background: var(--pink); }
+
+    .chapter.skip,
+    .standalone.skip { color: var(--muted); text-decoration: none; }
+
+    .chapter.important { width: max-content; background: var(--yellow); }
+    .chapter.new { width: max-content; background: var(--pink); }
+
+    .standalone {
+      margin: 28px 0;
+      font: 400 21px/1.2 var(--list);
+    }
+
+    .note-line { margin-top: 28px; }
+
+    .compact p { margin-bottom: 13px; }
+    .small-copy { font-size: 14.5px; line-height: 1.48; }
+
+    @media (max-width: 840px) {
+      body { overflow-x: auto; }
+      .document { width: 816px; padding: 12px 0 24px; }
+      .page { margin-bottom: 12px; }
+    }
+
+    @page { size: Letter; margin: 0; }
+
+    @media print {
+      body { background: #fff; }
+      .document { padding: 0; }
+      .page { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <article class="page" aria-label="第 1 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h1 class="page-title">阅读作业 II：<br>函数式编程</h1>
+
+        <section class="group">
+          <h2 class="section-label">目标</h2>
+          <p>本周的阅读量没有那么大，不过你们当中许多人可能会觉得，本周的主题比自己熟悉的内容更密集、更陌生一些（当然，这取决于你的经验）。</p>
+          <p>主要目标是理解 Swift 中支撑函数式编程的基础构造：协议、扩展、泛型和闭包。另一个重要主题是可选类型。课堂上我们已经提到过这些内容，现在该认真学习它们了。</p>
+        </section>
+
+        <section class="group">
+          <h2 class="section-label">截止时间</h2>
+          <p>你应当在第 6 次课之前完成全部阅读。</p>
+        </section>
+
+        <section class="group">
+          <h2 class="section-label">材料</h2>
+          <p>继续阅读与上周相同的文档（例如 <a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">《Swift 编程语言》</a>）。</p>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 1 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 2 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <h2 class="red-heading">《Swift 编程语言》</h2>
+        <p>不要略过任何 <code>NOTE</code>（注释）文本（位于灰色方框内），因为其中许多内容相当重要。不过，如果某条 <code>NOTE</code> 涉及 Objective-C 或桥接，则可以忽略。</p>
+        <p>如果正文中有指向其他章节的链接，除非链接所指的内容也属于本周的阅读作业，否则不必继续点进去阅读。</p>
+        <p>务必阅读每个主要章节开头的概述（例如，在<a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics/">“基础部分”</a>中，一定要读以“Swift 提供了许多基础数据类型……”开头的内容）。</p>
+        <p>除最后两节外，你已经读完了<a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/guidedtour/">“Swift 初见”</a>的全部内容。我们把“错误处理”推迟到下周（只是为了减少本周的阅读量）。</p>
+        <ul class="reading-list">
+          <li class="skip">并发</li>
+          <li class="important">协议与扩展</li>
+          <li class="skip">错误处理</li>
+        </ul>
+      </div>
+      <footer class="running-foot"><span>第 2 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 3 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small-copy">
+        <p>在<a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">“语言指南”</a>部分，请阅读下列各章中的指定小节。理解这些内容对于继续跟上课堂进度非常重要，因此不要敷衍这次阅读。</p>
+
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics/">基础部分（The Basics）</a></h2>
+          <p>可选类型在 Swift 中极其重要。目前我们仍然暂不考虑 Swift 的错误处理 API。</p>
+          <ul class="reading-list">
+            <li class="new">可选类型</li>
+            <li class="skip">错误处理</li>
+            <li class="skip">断言与先决条件</li>
+          </ul>
+        </section>
+
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/basicoperators/">基本运算符</a></h2>
+          <p>这一部分与可选类型有关，因此很重要。</p>
+          <ul class="reading-list"><li class="important">空合并运算符</li></ul>
+        </section>
+
+        <section class="group">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/stringsandcharacters/">字符串与字符</a></h2>
+          <p>如果你上周跳过了这一章，现在又有一次补读的机会。</p>
+          <ul class="reading-list">
+            <li>字符串字面量</li>
+            <li>初始化空字符串</li>
+            <li>字符串可变性</li>
+            <li>字符串是值类型</li>
+            <li>使用字符</li>
+            <li>连接字符串和字符</li>
+            <li class="important">字符串插值</li>
+            <li>Unicode</li>
+            <li class="important">字符计数</li>
+            <li class="new">访问和修改字符串</li>
+            <li class="important">子字符串</li>
+            <li>比较字符串</li>
+            <li class="skip">字符串的 Unicode 表示</li>
+          </ul>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 3 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 4 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small-copy">
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/collectiontypes/">集合类型</a></h2>
+          <p><code>Set</code> 不像 <code>Array</code> 和 <code>Dictionary</code> 那么常用，但它有很多很酷的用途（某种程度上，它的价值被低估了）。</p>
+          <ul class="reading-list">
+            <li>集合（Set）</li>
+            <li>执行集合操作（这一节也要读）</li>
+          </ul>
+        </section>
+
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/controlflow/">控制流</a></h2>
+          <p>这里只是补完几个有趣的语言特性。</p>
+          <ul class="reading-list">
+            <li>条件语句</li>
+            <li class="level-2">值绑定</li>
+            <li class="level-2">Where</li>
+            <li class="skip">控制转移语句</li>
+            <li class="level-2 skip">Continue</li>
+            <li class="level-2 skip">带标签的语句</li>
+            <li class="skip">检查 API 可用性</li>
+          </ul>
+        </section>
+
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Functions.html#//apple_ref/doc/uid/TP40014097-CH10-ID158">函数</a></h2>
+          <p>输入输出参数在 Swift 中很少使用。可变参数可以作为一种简洁方式，把实质上的“一组”值作为参数传入；尤其是在只包含一个元素的数组很常见时，这种方式很合适。</p>
+          <ul class="reading-list">
+            <li>函数参数标签与参数名称</li>
+            <li class="level-2">可变参数</li>
+            <li class="level-2">输入输出参数</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/closures/">闭包</a></h2>
+          <p>这是另一个“本周最重要的主题”。这里要阅读上周剩下的部分。务必确保自己理解整个主题（也就是本节中上周与本周的全部阅读内容）。</p>
+          <ul class="reading-list">
+            <li class="new">捕获值</li>
+            <li class="important">闭包是引用类型</li>
+            <li class="important">逃逸闭包</li>
+            <li class="skip">自动闭包</li>
+          </ul>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 4 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 5 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small-copy">
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/enumerations/">枚举</a></h2>
+          <p>原始值枚举其实没那么重要，不过这周不妨顺便把它们也加进来。</p>
+          <ul class="reading-list">
+            <li>原始值</li>
+            <li class="skip">递归枚举</li>
+          </ul>
+        </section>
+
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/classesandstructures/">结构体和类</a></h2>
+          <p>本节没有新的阅读内容，但一定要理解引用类型与值类型之间的区别。</p>
+        </section>
+
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/properties/">属性</a></h2>
+          <p>你会从演示中发现，计算属性在 SwiftUI 里使用得非常频繁。</p>
+          <ul class="reading-list">
+            <li class="important">计算属性</li>
+            <li class="skip">属性观察器</li>
+            <li class="skip">属性包装器</li>
+          </ul>
+        </section>
+
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/methods/">方法</a></h2>
+          <p>这里只有最后一节要读，不过其中讲的操作更可能出现在枚举中。请读完这一节，但要知道你不会经常这样做（我会尽量在本学期稍后的演示中展示它）。</p>
+          <ul class="reading-list">
+            <li>实例方法</li>
+            <li class="level-2">在可变方法中给 <code>self</code> 赋值</li>
+          </ul>
+        </section>
+
+        <h2 class="standalone skip">下标</h2>
+        <h2 class="standalone skip">继承</h2>
+        <p>我们基本会略过 Swift 中的面向对象编程，因为除了 <code>@Observable</code> 之外，你在 SwiftUI 中不会大量使用它。因此我再次把这部分标成灰色，以减少本周的阅读量。</p>
+      </div>
+      <footer class="running-foot"><span>第 5 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 6 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small-copy">
+        <section class="group tight">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/initialization/">初始化</a></h2>
+          <p>标成黄色的那一节介绍了 Swift 中一个非常巧妙的特性，它可以绕开这样一个两难问题：初始化变量时，不能在自身上调用函数。灰色小节表示我们为了减少本次阅读作业的篇幅而跳过的面向对象编程内容。</p>
+          <ul class="reading-list">
+            <li>为存储属性设置初始值</li>
+            <li>自定义初始化</li>
+            <li>默认初始化器</li>
+            <li>值类型的初始化器委托</li>
+            <li class="skip">类的继承和初始化</li>
+            <li class="skip">可失败初始化器</li>
+            <li class="skip">必需初始化器</li>
+            <li class="important">使用闭包或函数设置属性默认值</li>
+          </ul>
+        </section>
+
+        <h2 class="standalone skip">反初始化</h2>
+
+        <section class="group tight">
+          <h2 class="chapter important"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/optionalchaining/">可选链</a></h2>
+          <p>可选链是理解可选类型的一部分（也是“本周最重要的主题”之一）。请阅读整个章节。</p>
+        </section>
+
+        <h2 class="standalone skip">错误处理</h2>
+        <h2 class="standalone skip">并发</h2>
+        <h2 class="standalone skip">宏</h2>
+        <h2 class="standalone skip">类型转换</h2>
+
+        <section class="group">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/nestedtypes/">嵌套类型</a></h2>
+          <ul class="reading-list">
+            <li>嵌套类型实战</li>
+            <li>引用嵌套类型</li>
+          </ul>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 6 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 7 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small-copy">
+        <section class="group">
+          <h2 class="chapter new"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/extensions/">扩展</a></h2>
+          <p>这是涵盖 Swift 函数式编程基础的三个章节中的第一章。本周的目标，是在阅读这些章节时，真正尝试让函数式编程这一概念沉淀下来。</p>
+          <ul class="reading-list">
+            <li>扩展语法</li>
+            <li>计算属性</li>
+            <li>初始化器</li>
+            <li>方法</li>
+            <li class="skip">下标</li>
+            <li>嵌套类型</li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <h2 class="chapter new"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/protocols/">协议</a></h2>
+          <p>同上，请参考“扩展”部分的说明。</p>
+          <ul class="reading-list">
+            <li>协议语法</li>
+            <li>属性要求</li>
+            <li>方法要求</li>
+            <li>可变方法要求</li>
+            <li class="skip">初始化器要求</li>
+            <li class="skip">将协议用作类型</li>
+            <li class="skip">委托</li>
+            <li>通过扩展添加协议遵循</li>
+            <li>使用合成实现来采纳协议</li>
+            <li class="skip">协议类型的集合</li>
+            <li>协议继承</li>
+            <li class="skip">仅限类的协议</li>
+            <li class="skip">协议组合</li>
+            <li class="skip">检查协议遵循</li>
+            <li class="skip">可选协议要求</li>
+            <li>协议扩展</li>
+          </ul>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 7 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 8 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small-copy">
+        <section class="group">
+          <h2 class="chapter new"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/generics/">泛型</a></h2>
+          <p>同上。</p>
+          <p>我们没有讲泛型如何应用到协议本身（也就是下方关于“关联类型”的小节）。本周暂时不读这些内容（尽管这样一来，其他某些小节可能会提到你尚未读过的概念）。这是因为需要吸收的面向协议编程内容已经非常多了，再加上关联类型恐怕就过量了。</p>
+          <ul class="reading-list">
+            <li>泛型所解决的问题</li>
+            <li>泛型函数</li>
+            <li>类型参数</li>
+            <li>类型参数的命名</li>
+            <li>泛型类型</li>
+            <li>扩展泛型类型</li>
+            <li>类型约束</li>
+            <li class="skip">关联类型</li>
+            <li>泛型 Where 子句</li>
+            <li>带有泛型 Where 子句的扩展</li>
+            <li>上下文 Where 子句</li>
+            <li class="skip">带有泛型 Where 子句的关联类型</li>
+            <li class="skip">泛型下标</li>
+          </ul>
+        </section>
+
+        <h2 class="standalone skip">不透明类型和装箱协议类型（这一节解释 <code>some View</code>）</h2>
+        <h2 class="standalone skip">自动引用计数</h2>
+        <h2 class="standalone skip">内存安全</h2>
+      </div>
+      <footer class="running-foot"><span>第 8 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 9 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small-copy">
+        <section class="group">
+          <h2 class="chapter"><a href="https://docs.swift.org/swift-book/LanguageGuide/AccessControl.html">访问控制</a></h2>
+          <ul class="reading-list">
+            <li>模块和源文件</li>
+            <li>访问级别</li>
+            <li>访问控制语法</li>
+            <li class="skip">自定义类型</li>
+            <li class="skip">子类</li>
+            <li class="skip">常量、变量、属性和下标</li>
+            <li class="skip">初始化器</li>
+            <li class="skip">协议</li>
+            <li class="skip">扩展</li>
+            <li class="skip">泛型</li>
+            <li class="skip">类型别名</li>
+          </ul>
+        </section>
+
+        <h2 class="standalone skip">高级运算符</h2>
+      </div>
+      <footer class="running-foot"><span>第 9 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 10 页">
+      <header class="running-head"><span>CS193P iOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <h2 class="red-heading">Swift API 设计指南</h2>
+        <p>请完整阅读<a href="https://swift.org/documentation/api-design-guidelines/">《Swift API 设计指南》</a>文档。</p>
+        <p>本周请<strong>再次</strong>通读。现在它应该开始逐渐沉淀了。随着课程推进，你最终应该成为一名<em>擅长为属性、方法及其他 Swift 构造命名的专家</em>。为此，你需要经常回头查阅这份文档。</p>
+        <p>凡是出现“MORE DETAIL”（更多细节）的地方，务必点击查看。</p>
+        <p>请特别留意“Write a documentation comment”（编写文档注释）这一节。</p>
+        <p>请特别留意“Follow case conventions”（遵循大小写约定）这一节。</p>
+        <p>请特别留意完整的“Argument Labels”（参数标签）一节。</p>
+        <p>目前可以忽略涉及协议的要点。下周我们学到协议时，记得回来再次查阅这份文档。</p>
+        <p>最后一节“Special Instructions”（特殊说明）的最后一个小节“Take extra care with unconstrained polymorphism”（格外谨慎地处理无约束多态）也可以忽略。我们不会使用 <code>Any</code> 和 <code>AnyObject</code> 类型。</p>
+      </div>
+      <footer class="running-foot"><span>第 10 页，共 10 页</span><span>阅读作业 II：更多 Swift</span></footer>
+    </article>
+  </main>
+</body>
+</html>
