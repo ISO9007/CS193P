@@ -20,10 +20,13 @@ struct MatchMarkers: View {
     
     var body: some View {
         HStack {
-            
-            let colCount = Int((Float(matchs.count) / 2).rounded(.up))
-            ForEach(0..<colCount, id: \.self) { section in
-                sectionMatchMarker(section: section, sectionCount: 2)
+            if matchs.isEmpty {
+                matchMarker(peg: 0)
+            }else {
+                let colCount = Int((Float(matchs.count) / 2).rounded(.up))
+                ForEach(0..<colCount, id: \.self) { section in
+                    sectionMatchMarker(section: section, sectionCount: 2)
+                }
             }
 
         }
@@ -53,34 +56,10 @@ struct MatchMarkers: View {
 }
 
 
-struct MatchMarkersPerview: View {
-    var matchs: [Match]
-    
-    var body: some View {
-        HStack {
-            ForEach(matchs.indices, id: \.self) { _ in
-                Circle()
-            }
-            MatchMarkers(matchs: matchs)
-        }
-        .frame(height: 50)
-    }
-}
+
 
 #Preview {
-    VStack(alignment: .leading, spacing: 20) {
-        MatchMarkersPerview(matchs: [.exact, .exact, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .exact, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .nomatch, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .nomatch, .inexact, .inexact, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .nomatch, .nomatch, .inexact, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .nomatch, .inexact, .inexact])
-        MatchMarkersPerview(matchs: [.exact, .exact, .nomatch, .inexact, .inexact])
-    }
-    .padding()
-    
+    MatchMarkers(matchs: [.exact, .exact, .inexact, .nomatch, .exact, .exact])
 }
 
 

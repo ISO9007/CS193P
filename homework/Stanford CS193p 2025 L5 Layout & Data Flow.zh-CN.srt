@@ -1,0 +1,4161 @@
+1
+00:00:05,440 --> 00:00:10,400
+欢迎来到 Stanford CS193p 2025 年春季课程的第 5 讲。
+Welcome to Lecture 5, Stanford CS193p, Spring of 2025.
+
+2
+00:00:10,400 --> 00:00:17,200
+今天主要讲幻灯片内容，大概会占三分之二。
+So mostly slides today — maybe two-thirds slides. I'm going to cover two major things here:
+
+3
+00:00:17,200 --> 00:00:20,800
+我要讲两个主要主题：布局和数据流。在这两个主题之间，
+layout and data flow. And in between, I am actually going to go to the
+
+4
+00:00:20,800 --> 00:00:24,240
+我会切到演示，稍微讲一下作业 1。好。
+demo and talk a little bit about Assignment 1. Okay.
+
+5
+00:00:24,240 --> 00:00:28,560
+还有之前说过会进一步讲解的 match 函数。
+And also that match function that I told you I would talk about more.
+
+6
+00:00:28,560 --> 00:00:31,280
+如果有时间，我们还会稍微清理一下代码。
+And we'll just do a tiny bit of code cleanup if we have time.
+
+7
+00:00:31,280 --> 00:00:35,920
+我设了一个一小时后响的闹钟，以确保能给数据流留出时间，
+I've set an alarm here to go off in one hour so that I make sure I leave time for data flow,
+
+8
+00:00:35,920 --> 00:00:42,880
+至于能讲多少就讲多少。好，下面来谈布局。
+but we'll do whatever we can there to do that. All right, so let's talk about layout.
+
+9
+00:00:42,880 --> 00:00:48,800
+布局解决的是 SwiftUI 如何决定为每个视图分配多少空间，对吧？
+Layout is about how SwiftUI decides how much space to give to all the Views, right?
+
+10
+00:00:48,800 --> 00:00:54,320
+比如这里有填充了颜色的圆角矩形；在作业 2 中，则有表情符号卡片。
+We've got rounded rectangles with colors in them. In your Assignment 2, you've got emoji faces.
+
+11
+00:00:54,880 --> 00:01:00,320
+那么，SwiftUI 如何决定每个元素能获得多少空间呢？
+So how does it decide how much space each thing gets in there?
+
+12
+00:01:00,320 --> 00:01:05,600
+这个过程其实非常简单。第一步，像 HStack 和
+It's actually an amazingly simple process. The first thing is that container Views like
+
+13
+00:01:05,600 --> 00:01:12,240
+VStack 这样的容器视图，会把分配给自己的部分空间提供给子视图。
+HStack and VStack offer some of the space that was offered to them to their subviews.
+
+14
+00:01:12,240 --> 00:01:15,760
+稍后我会解释它们具体如何分配。
+And I'm going to talk about how they do that in a second here.
+
+15
+00:01:17,280 --> 00:01:22,640
+第二步，VStack 或 HStack 内部的子视图选择自己的尺寸。
+The subviews inside of a VStack or HStack then choose their own size.
+
+16
+00:01:22,640 --> 00:01:25,760
+理解这一点很重要：视图选择自己的尺寸。
+This is an important thing to understand: Views choose their own size.
+
+17
+00:01:25,760 --> 00:01:30,080
+尺寸不是由外部直接指定的。VStack 不会直接给内部视图
+They're not assigned a size. VStack doesn't just assign sizes to
+
+18
+00:01:30,080 --> 00:01:33,040
+指定尺寸，而是由视图自己选择。为什么呢？
+the things inside — they choose it. And why is that?
+
+19
+00:01:33,040 --> 00:01:38,240
+因为最清楚 Text 视图应该多大的，正是 Text 视图本身，
+Well, because nobody is better equipped to decide how big a Text View should be
+
+20
+00:01:38,240 --> 00:01:41,920
+对吧？它掌握文本和字体的全部信息。
+than the Text View itself, right? It knows all about text and fonts.
+
+21
+00:01:42,480 --> 00:01:45,840
+因此应该由 Text 决定，而不是 VStack。VStack 并不了解文本，
+So it should decide, not the VStack. The VStack knows very little
+
+22
+00:01:45,840 --> 00:01:50,640
+也不需要了解。所以第二步就是：让视图选择自己的尺寸。
+about text and it doesn't need to know. So step two is: let Views choose their own size.
+
+23
+00:01:50,640 --> 00:02:00,000
+第三步，容器视图按照子视图选定的尺寸，在内部确定其位置。
+Then step three is that the container Views position the View at that size inside themselves.
+
+24
+00:02:00,000 --> 00:02:05,200
+所以一共只有三步：提供空间、选择自身尺寸、确定位置。
+So, it's just a three-step process: offer space, choose your own size, place them in there.
+
+25
+00:02:05,200 --> 00:02:14,480
+布局就是这样完成的。每种容器视图都会执行这个流程，只是各自的决策不同。
+That is how layout happens. Now, each of the container Views plays this game and makes different decisions.
+
+26
+00:02:14,480 --> 00:02:18,640
+下面具体看看它们如何完成布局。我们以 HStack 和 VStack 为例，
+So, let's talk a little bit about how they do it, and we'll use HStack and VStack since they’re the
+
+27
+00:02:18,640 --> 00:02:23,600
+因为你最熟悉这两种容器。HStack 和 VStack 必须把
+ones you’re most familiar with. HStack and VStack have to offer
+
+28
+00:02:23,600 --> 00:02:27,520
+分配给自己的空间提供给内部的子视图。
+their space to the subviews inside. The way they do that is that they
+
+29
+00:02:27,520 --> 00:02:34,480
+它们会先在尺寸弹性最低的子视图之间，平均分配全部可用空间并提出尺寸方案。
+offer all of their space split evenly amongst their least flexible subview.
+
+30
+00:02:35,360 --> 00:02:39,280
+其中尺寸最固定、最不容易伸缩的子视图，会最先收到尺寸方案。
+Their subview that is the most rigid on its size gets the offer first.
+
+31
+00:02:39,280 --> 00:02:43,280
+也可能有多个子视图并列，例如三个子视图具有相同的尺寸弹性。
+It might be a tie — you might have three things in there that have the same flexibility.
+
+32
+00:02:44,720 --> 00:02:48,240
+这时容器会把可用空间平均提供给它们，看看它们各自选择多大的尺寸。
+It's gonna divide equally and offer to them to see what they choose.
+
+33
+00:02:48,240 --> 00:02:53,200
+那么，“有尺寸弹性”和“无尺寸弹性”具体是什么意思？你已经见过一些缺乏尺寸弹性的视图，
+Now, what do I mean by flexible or inflexible? Some inflexible Views that
+
+34
+00:02:53,200 --> 00:02:58,960
+例如 Image 和 Text。它们的固有尺寸比较固定：Text 希望
+you know are Image and Text. These things are very rigid — a Text wants
+
+35
+00:02:58,960 --> 00:03:05,120
+自己的尺寸恰好容纳文本；Image 则希望尺寸正好适合其图像内容，
+to fit itself exactly to the text in there, and an Image wants to fit its image perfectly (whatever
+
+36
+00:03:05,120 --> 00:03:11,120
+无论图像来自 JPEG 还是 asset。我们也可以让这些视图变得更有尺寸弹性一些。
+the JPEG or asset is driving it). We can take these inflexible Views
+
+37
+00:03:11,120 --> 00:03:14,400
+之前学过使用 minimumScaleFactor 视图修饰器来实现这一点。
+and make them a little more flexible. We learned how to do that with the
+
+38
+00:03:14,400 --> 00:03:18,160
+还记得我们把它设为 0.1 吗？
+View modifier minimumScaleFactor. Remember that thing we set to 0.1 ?
+
+39
+00:03:18,160 --> 00:03:21,280
+这基本上是在对 Text 说：“我希望你使用这种字体，
+That's basically saying to Text: “I want you to be this font,
+
+40
+00:03:21,280 --> 00:03:26,480
+但允许你把字号一直缩小到原来的 10%。”这样 Text 的尺寸就更有尺寸弹性了。
+but I’ll let you go all the way down to 10% of that size font.” That makes it more flexible.
+
+41
+00:03:26,480 --> 00:03:31,520
+Image 还有一个尚未讲过的视图修饰器，叫作 resizable，
+There’s another View modifier we haven’t talked about for Image called resizable
+
+42
+00:03:31,520 --> 00:03:35,920
+它允许图像内容放大或缩小，尤其是缩小。
+that will allow the image to scale its bits up and down — especially down.
+
+43
+00:03:35,920 --> 00:03:40,000
+图像不宜放得太大，否则会出现颗粒感，
+You don't want to scale an image's bits too much up or it starts to get grainy,
+
+44
+00:03:40,000 --> 00:03:44,000
+但缩小当然没问题。另外还有一些尺寸弹性较大的视图，
+but it can certainly scale down. Then there are Views that are
+
+45
+00:03:44,000 --> 00:03:48,160
+例如 Circle。无论给 Circle 提供多少空间，
+mostly flexible, like a Circle. A Circle, if you offer it space,
+
+46
+00:03:48,160 --> 00:03:52,800
+它通常都会全部接受，只是会保持 1:1 的宽高比。
+it’s going to take all the space you offer it — except it will maintain a 1:1 aspect ratio.
+
+47
+00:03:52,800 --> 00:03:56,640
+因此它并非完全具备尺寸弹性，但尺寸弹性已经很高。
+So it’s a little less than fully flexible, but it’s pretty darn flexible.
+
+48
+00:03:56,640 --> 00:04:01,120
+最后是完全具备尺寸弹性的视图，最典型的就是 Rectangle。
+And then we've got the fully flexible View — the iconic one is Rectangle.
+
+49
+00:04:01,120 --> 00:04:06,480
+如果把 Rectangle 放进 VStack 或 HStack，它会接受提供给它的全部空间。
+If you put a Rectangle in a VStack or an HStack, it's going to take all the space offered to it.
+
+50
+00:04:06,480 --> 00:04:09,520
+无论 HStack 或 VStack 提供多少空间，它都会全部占用。
+Whatever the HStack or VStack offers, it will always take it all.
+
+51
+00:04:09,520 --> 00:04:16,320
+所以 Rectangle 最后才会收到尺寸方案；如果最先把空间提供给它，
+And that's why it's offered the space last — because if you offered the Rectangle the space
+
+52
+00:04:16,320 --> 00:04:19,520
+它会全部占用，其他视图便没有空间可用了。
+first, it would take it all and there would be none left for any other View.
+
+53
+00:04:19,520 --> 00:04:24,960
+这就是该策略的核心：先处理尺寸弹性最低的视图。
+So that's why it does this — the simple strategy goes to the least flexible Views first.
+
+54
+00:04:24,960 --> 00:04:29,920
+尺寸弹性最低的视图会在容器提出的范围内选择自身尺寸。
+After the least flexible ones pick their size within the size they're offered (they're
+
+55
+00:04:29,920 --> 00:04:36,160
+它们选好之后，VStack 会从自己的可用空间中扣除这些视图占用的部分，
+offered some size, then pick their size inside that), the VStack removes the space they chose
+
+56
+00:04:36,160 --> 00:04:43,280
+再把剩余空间提供给下一组尺寸弹性较低、
+from the space that the VStack has and starts offering the rest to the next least flexible,
+
+57
+00:04:43,280 --> 00:04:45,760
+也就是相对更有尺寸弹性的视图。明白这个过程了吗？
+or the more flexible, Views. You see how it's doing that?
+
+58
+00:04:45,760 --> 00:04:52,400
+然后不断重复，直到空间用完，或者所有视图都处理完毕。
+It's just rinse and repeat until it runs out of space or runs out of Views to offer things to.
+
+59
+00:04:52,400 --> 00:04:54,560
+这就是它的工作原理。
+And that's how it works. It really is
+
+60
+00:04:54,560 --> 00:04:59,920
+它确实非常简单——仅此而已。现在，在所有视图都选择了自己的尺寸并且
+incredibly simple — that's all there is to it. Now, after all the Views have chosen their
+
+61
+00:04:59,920 --> 00:05:05,280
+VStack 将它们放在那里之后，VStack 会自行调整大小以适合这些视图。
+own size and the VStack puts them in there, the VStack sizes itself to fit those Views.
+
+62
+00:05:05,280 --> 00:05:11,760
+因此，如果 VStack 或 HStack 中包含 Rectangle，这个容器也会完全具备尺寸弹性。
+And that's why if you put a Rectangle in a VStack or an HStack, it becomes fully flexible.
+
+63
+00:05:11,760 --> 00:05:15,440
+你必须考虑这一点，因为很多时候你将 HStack 放入 VStack 中，
+You have to think about that, because a lot of times you're putting HStacks inside VStacks,
+
+64
+00:05:15,440 --> 00:05:19,360
+并且你想问：“我放入 VStack 中的 HStack 是否完全具备尺寸弹性？”
+and you want to ask: “Is this HStack that I'm putting inside this VStack fully flexible?” Well,
+
+65
+00:05:19,360 --> 00:05:22,720
+这取决于 HStack 内部是否包含完全具备尺寸弹性的视图。
+that depends on whether there's a fully flexible thing inside the HStack.
+
+66
+00:05:22,720 --> 00:05:26,160
+因为只要 HStack 内部包含完全具备尺寸弹性的视图，
+Because of course, we know that if the HStack has something fully flexible inside of it,
+
+67
+00:05:26,160 --> 00:05:29,200
+那么当 HStack 向它提供空间时，它就会占据一切。
+when the HStack offers its space to it, it will take it all.
+
+68
+00:05:31,520 --> 00:05:36,080
+完全具备尺寸弹性的视图中，Rectangle 是 UI 布局里最常用的一种，
+Fully flexible Views — Rectangle is the most common one we'll use in the UI, not just to
+
+69
+00:05:36,080 --> 00:05:41,760
+不仅可以绘制矩形，还可以创建可伸缩空间，我将在今天的演示中向您展示这一点。
+draw rectangles, but to make flexible space, and I'm going to show you that in the demo today.
+
+70
+00:05:43,760 --> 00:05:52,960
+矩形是强大的布局工具，aspectRatio 也是如此。就像 aspectRatio 约束 Circle 一样，aspectRatio 可以约束我们的视图。
+Rectangles are powerful layout tools, and so is aspectRatio. Just like aspectRatio constrains Circle, aspectRatio can constrain our Views.
+
+71
+00:05:52,960 --> 00:05:56,880
+我们的色钉——我们总是按 1:1 的比例制作，这实际上很好。
+Our pegs — we always make them 1:1, and that's actually kind of nice.
+
+72
+00:05:56,880 --> 00:06:01,031
+我们不希望它们是高的矩形；我们希望它们是 1:1，
+We don't want them to be tall rectangles; we want them to be 1:1, so we're constraining
+
+73
+00:06:01,031 --> 00:06:05,760
+所以我们限制它们并降低它们的尺寸弹性。有一些我没有讨论过的非常有价值的视图，
+them and making them less flexible there. There are a couple of really valuable Views
+
+74
+00:06:05,760 --> 00:06:09,040
+您可以在 HStack 和 VStack 中使用。
+that I haven't talked about that you can use inside HStacks and VStacks.
+
+75
+00:06:09,040 --> 00:06:12,400
+其中之一是 Spacer。
+One of them is Spacer. Spacer is kind of like a
+
+76
+00:06:12,400 --> 00:06:17,520
+Spacer 有点像一个清晰绘制的矩形，除了它有这个 minLength 参数，
+Rectangle that is drawn clear, except that it has this minLength parameter,
+
+77
+00:06:17,520 --> 00:06:23,760
+这意味着它将是最小尺寸。您可以使用间隔符在 HStack 和
+which means it'll be a minimum amount of size. You use spacers to put space between things in
+
+78
+00:06:23,760 --> 00:06:25,840
+VStack 中的事物之间放置空间。
+HStacks and VStacks. But it's like a
+
+79
+00:06:25,840 --> 00:06:30,480
+但它和 Rectangle 一样，完全具备尺寸弹性。因此，如果有一个 HStack，
+Rectangle in that it's fully flexible. So if you have an HStack and you put a Text,
+
+80
+00:06:30,480 --> 00:06:34,960
+然后放置一个 Text，然后放置一个 Spacer，然后放置一个 Text，
+then a Spacer, and then a Text, the two pieces of text will get slammed to the outside--to the
+
+81
+00:06:34,960 --> 00:06:37,680
+则这两段文本将被猛烈地推向外侧（前导和尾随），
+leading and trailing--because the thing in the middle will grab all the remaining space,
+
+82
+00:06:37,680 --> 00:06:41,840
+因为中间的内容将占据所有剩余空间，
+since it's fully flexible. Question: how can you make
+
+83
+00:06:41,840 --> 00:06:48,240
+因为 Spacer 完全具备尺寸弹性。问题：如何确保各个视图不会互相重叠？
+sure that things don't overlap each other? The question is, how do I make sure that
+
+84
+00:06:48,240 --> 00:06:55,040
+如何确保 UI 中的内容不会重叠？嗯，我刚才谈到的整个
+things aren't overlapping inside my UI? Well, the whole SwiftUI mechanism I just
+
+85
+00:06:55,040 --> 00:06:58,480
+SwiftUI 机制从根本上来说是为了不重叠事物而构建的。
+talked about is fundamentally built not to overlap things.
+
+86
+00:06:58,480 --> 00:07:02,080
+因为我为事物提供空间，当它们拿走时，我就把那个空间拿走，
+Because I offer space to things, and when they take it, I take that space away, and now I'm
+
+87
+00:07:02,080 --> 00:07:05,520
+现在我提供剩余的空间。
+offering the remaining space. So hopefully you don't
+
+88
+00:07:05,520 --> 00:07:07,600
+所以希望你不会遇到很多重叠问题。您是否遇到过很多重叠的问题？
+have a lot of overlap problems. Were you having a lot of overlapping
+
+89
+00:07:07,600 --> 00:07:12,320
+是的 - 你担心它会发生，但令人惊讶的是，由于这种策略，
+problems? Yeah — you were worried it was going to happen, but it surprisingly won't happen
+
+90
+00:07:12,320 --> 00:07:16,240
+它不会发生太多，我们给予空间，然后我们把它拿走，我们只给予剩余的空间，
+much because of this strategy, where we give space, then we take it away, and we're only
+
+91
+00:07:16,240 --> 00:07:22,160
+这样它们就不会重叠。现在，视图可以在它们被赋予的空间之外进行绘
+given the remaining space so they can't overlap. Now, Views are allowed to draw outside the space
+
+92
+00:07:22,160 --> 00:07:25,840
+制——这是可能的——但很少有视图这样做。
+they were given — that is possible — but very few Views do that.
+
+93
+00:07:25,840 --> 00:07:29,600
+视图很少这样做。另一个常用视图是 Divider。
+It's rare for a View to do that. The other one is Divider.
+
+94
+00:07:29,600 --> 00:07:35,440
+因此，Divider 在事物之间画了一条小线——一条灰色的线，
+So Divider draws a little line--a little kind of gray line--between the things, and
+
+95
+00:07:35,440 --> 00:07:40,880
+并且它在横轴方向上是完全具备尺寸弹性的。因此，在 VStack 中，它在水平方向上完全具备尺寸弹性，
+it's fully flexible in the cross-axis direction. So, in a VStack, it's fully flexible horizontally,
+
+96
+00:07:40,880 --> 00:07:46,320
+但在垂直方向上不具尺寸弹性——高度就是这条分隔线的粗细。
+but not flexible vertically — it's only the width of that line.
+
+97
+00:07:46,320 --> 00:07:51,840
+可以使用 Divider 在 HStack 或 VStack 的内容之间添加分隔线。
+Divider is how you can put dividing lines between things in an HStack or VStack.
+
+98
+00:07:51,840 --> 00:07:56,640
+Spacer 和 Divider 经常用于安排 HStack、VStack 中各个视图的位置。
+Common to use these two things to arrange things in your HStacks and VStacks.
+
+99
+00:07:56,640 --> 00:08:01,200
+HStack 和 VStack 的这套处理方式——例如优先处理尺寸弹性最低的视图——
+Now, that whole thing that HStack and VStack do — where they go least flexible first and
+
+100
+00:08:01,200 --> 00:08:04,880
+也可以被覆盖。你可以使用
+all that — can be overridden. You can control it with this
+
+101
+00:08:04,880 --> 00:08:09,680
+layoutPriority 视图修饰器来控制它。把这个修饰器应用到视图后，
+thing called layoutPriority. This View modifier, if you put it on a View,
+
+102
+00:08:09,680 --> 00:08:15,920
+其默认布局优先级为 0。如果所有视图的 layoutPriority 都是 0，
+has a default layout priority of 0. So all the Views are doing the least
+
+103
+00:08:15,920 --> 00:08:19,200
+仍然会按照刚才所说的尺寸弹性来决定处理顺序。
+flexible thing I just talked about if they're all layout priority 0.
+
+104
+00:08:19,200 --> 00:08:24,000
+但如果把某个视图的优先级提高到 0 以上——它是浮点数，
+But if you bump one up above zero (and this is a floating-point number), you could bump it up to
+
+105
+00:08:24,000 --> 00:08:28,960
+比如设为 0.1——这个视图就会获得更高优先级，
+0.1 if you wanted — that would be more than zero. That one will get priority, and it will be the
+
+106
+00:08:28,960 --> 00:08:35,920
+最先收到空间方案。明白吗？这里有一个 Text、一个 Image 和另一个 Text。
+first one offered space. You see? So, in this case, I've got a Text, an Image, and another Text.
+
+107
+00:08:35,920 --> 00:08:39,040
+假设其中一个 Text 非常重要，我希望它能完整显示；
+One of the Texts is really important that I see the whole thing, and if I'm
+
+108
+00:08:39,040 --> 00:08:43,280
+但当前空间有限，无法同时容纳这三个视图。
+space constrained or I can't fit all these three things — because what happens then
+
+109
+00:08:43,280 --> 00:08:48,000
+这时会发生什么？HStack 给前两个视图提供空间后，
+if you can't fit all these three things? Then after the HStack in this case offers
+
+110
+00:08:48,000 --> 00:08:51,600
+可能已经没有足够空间，只能给最后一个 Text 提供很小的尺寸。
+space to the first two and it runs out of space, it's going to offer too small a space
+
+111
+00:08:51,600 --> 00:08:56,800
+假设最后这个 Text 不重要，而 HStack 已经几乎没有剩余空间，
+for that last Text, which is unimportant. There's just no space left in the HStack,
+
+112
+00:08:56,800 --> 00:09:03,680
+它得到的空间就会很少。Text 在空间不足时会缩小自身宽度，
+so it offers too little. Now, what do Texts do when they're offered too little? They size themselves to be
+
+113
+00:09:03,680 --> 00:09:09,040
+并用省略号截断内容。所以幻灯片右下角显示的是“Swift is...”，
+too little and then they use an ellipsis . So you see in my slide there in the bottom right,
+
+114
+00:09:09,040 --> 00:09:13,840
+而不是完整的“Swift is great”。演示中也见过这种情况：
+“Swift is...” instead of “Swift is great.” And we actually saw this in the demo — we tried to
+
+115
+00:09:13,840 --> 00:09:18,320
+我们把“Guess”按钮放进 UI，并把字号设为 80 pt，
+put our “Guess” button, remember, in the UI, and we tried to make it 80-point font, and it just
+
+116
+00:09:18,320 --> 00:09:24,080
+但由于空间不足，最终只显示了“...”。layoutPriority
+put "..." because it couldn't fit that in there. layoutPriority can just override this whole
+
+117
+00:09:24,080 --> 00:09:27,440
+可以改变视图收到空间方案的先后顺序。布局优先级可以
+thing of who gets offered space first. And the layout priority can
+
+118
+00:09:27,440 --> 00:09:29,520
+是正数，也可以是负数。
+be positive or negative. So negative things are very
+
+119
+00:09:29,520 --> 00:09:34,640
+负值表示较低优先级，正值表示较高优先级，0 表示优先级相同。
+low priority, and positive things are very high priority, and zero is equal priority.
+
+120
+00:09:35,520 --> 00:09:40,800
+下面介绍 VStack 和 HStack 之外的其他容器视图，也就是其他充当“说明书”的乐高
+Now it's time to talk about other container Views — other “instruction manual Lego”
+
+121
+00:09:40,800 --> 00:09:44,080
+视图。目前我们使用过的容器视图只有 HStack 和 VStack，
+Views — than VStack and HStack. Those are the only ones we've
+
+122
+00:09:44,080 --> 00:09:47,520
+也是迄今为止我们最常用的——HStack 和 VStack。
+used so far, and they are by far the most common we use--HStack and VStack.
+
+123
+00:09:47,520 --> 00:09:51,360
+所以不要觉得自己错过了——90% 的时间我们都在使用这些东西。
+So don't feel like you're missing out — 90% of the time we're using those things.
+
+124
+00:09:51,360 --> 00:09:59,200
+但这里还有其他一些：LazyHStack 和 LazyVStack。为什么叫懒呢？好吧，这些很懒，
+But here are some other ones: LazyHStack and LazyVStack. Why are is it called lazy? Well, these are lazy because,
+
+125
+00:09:59,200 --> 00:10:05,040
+因为与常规 HStack 或 VStack 不同，如果视图不在屏幕上，它不会将它们布局。
+unlike a regular HStack or VStack, if the Views are not on screen, it doesn't lay them out.
+
+126
+00:10:05,040 --> 00:10:09,120
+它不会通过“为他们提供空间，你想要多少空间？”以及所有这些东西。
+It doesn't go through the “offer them space, how much space do you want?” and all that stuff.
+
+127
+00:10:09,120 --> 00:10:13,920
+因此，假设您有一个 ScrollView，其中包含所有 iPod 歌曲 — 其中 10,000 首。
+So, imagine you have a ScrollView with all your iPod songs — 10,000 of them.
+
+128
+00:10:13,920 --> 00:10:16,560
+如果你列出 10,000 个小东西说“这首歌”
+It would be horrifically inefficient if you laid
+
+129
+00:10:16,560 --> 00:10:22,320
+和“这张专辑”，效率会非常低。那太荒谬了。
+out 10,000 little things saying “This song” and “This album.” That would be ridiculous.
+
+130
+00:10:22,320 --> 00:10:26,800
+因此，在这种情况下，您可以使用 LazyVStack，
+So you would use a LazyVStack in that case, and it would only lay out the first 10, and then,
+
+131
+00:10:26,800 --> 00:10:31,120
+它只会布置前 10 个，然后，当您向下滚动时，它会根据需要开始布置其他的。
+as you scroll down, it would start laying out the other ones on demand, as it went through.
+
+132
+00:10:31,120 --> 00:10:34,640
+这里有一点很有意思。我们知道，对于 VStack 来说，
+Now, one thing that's interesting about these is that we know that a VStack--
+
+133
+00:10:34,640 --> 00:10:39,680
+如果内部包含有尺寸弹性的视图，VStack 也会具有尺寸弹性，并尽可能占用更大的空间。
+if you put a flexible thing in there, it gets flexible, and gets as big of a space it can do.
+
+134
+00:10:39,680 --> 00:10:44,000
+而这恰恰相反。 LazyVStack 尝试尽可能小。
+And this is the exact opposite. A LazyVStack tries to be as small as possible.
+
+135
+00:10:44,000 --> 00:10:48,640
+因此，如果您将一个具有尺寸弹性的视图放入 LazyVStack 中，它可能会将其压缩到零。
+So if you put a flexible-size thing in a LazyVStack, it might squish it down to zero.
+
+136
+00:10:48,640 --> 00:10:53,200
+那是因为它知道它将存在于 ScrollViews 中，并且如果您的滚动项目太大，
+And that's because it knows it's going to live in ScrollViews, and if your scrolling items
+
+137
+00:10:53,200 --> 00:10:58,400
+那么它希望变小。因此，ScrollView 中始终使用
+are too big, so it wants to be small. So LazyHStack and LazyVStack are used
+
+138
+00:10:58,400 --> 00:11:02,080
+LazyHStack 和 LazyVStack。它们通常用于 ScrollView。
+in a ScrollView all the time. They are common to use in a ScrollView.
+
+139
+00:11:02,080 --> 00:11:08,400
+然后是 LazyHGrid 和 LazyVGrid，它们几乎与 LazyHStack 和
+Then there's LazyHGrid and LazyVGrid, which are almost exactly the same as LazyHStack and
+
+140
+00:11:08,400 --> 00:11:14,000
+LazyVStack 完全相同，只不过它们允许您在相反方向放置多个视图。
+LazyVStack, except they let you put more than one View in the opposite direction.
+
+141
+00:11:14,000 --> 00:11:20,160
+因此，如果它是 LazyVGrid，则每行可以有两个或三个项目，
+So, if it's a LazyVGrid, you can have two or three items per row, not just one item
+
+142
+00:11:20,160 --> 00:11:25,840
+而不是像 VStack 或 LazyVStack 那样每行只有一个项目。
+per row like in a VStack or LazyVStack. How you place those things horizontally,
+
+143
+00:11:25,840 --> 00:11:31,040
+你可以控制这些视图在水平方向的布局方式——它的初始化器有一个名为 columns 的参数（
+you get to control that — there's an argument to its initializer called columns (or rows if
+
+144
+00:11:31,040 --> 00:11:38,240
+对于 HGrid 则是 rows）。这个参数表示：“在水平方向排列视图时，
+it's an HGrid vs. VGrid). That argument says things like, “Well, when you put things across here horizontally,
+
+145
+00:11:38,240 --> 00:11:41,200
+其中一个应该采用弹性尺寸，另一个则必须采用指定的固定尺寸。”
+this one should be flexible size. This one has to be exactly this
+
+146
+00:11:41,200 --> 00:11:44,960
+或者其他什么——只是一些协调来说明它们是什么。
+size" or whatever—just some coordination to say what they are.
+
+147
+00:11:44,960 --> 00:11:50,000
+然后会发生什么，你有你的 LazyVGrid，你只需给它一大堆视图，对吧？
+And then what happens is you have your LazyVGrid and you just give it a whole pile of Views, right?
+
+148
+00:11:50,000 --> 00:11:53,600
+一整袋乐高装满了视图，它就开始将它们排列起来——一、
+A whole bag of Lego full of Views, and it just starts laying them out—one,
+
+149
+00:11:53,600 --> 00:11:56,720
+二、三横，然后转到下一个、三、四、五横。
+two, three across, then goes to the next one, three, four, five across.
+
+150
+00:11:56,720 --> 00:11:58,880
+你明白我的意思吗？它只是把它们倒进去。
+You see what I mean? It's just pouring them in.
+
+151
+00:11:58,880 --> 00:12:04,080
+这几乎就像文本在页面上运行的方式一样，只是将它们这样布局。
+It's almost like the way text runs on a page where it's just laying them out like that.
+
+152
+00:12:04,080 --> 00:12:08,000
+所以，它被称为网格，因为是的，它是一个垂直增长的堆栈，
+So, it's called a grid because yes, it's a vertically growing stack,
+
+153
+00:12:08,000 --> 00:12:13,280
+但由于它有一些水平元素，它是一种网格，
+but since it has some horizontal elements to it, it's kind of a grid, but it's not really a
+
+154
+00:12:13,280 --> 00:12:18,800
+但它并不是像电子表格或其他东西那样严格的网格。还有另外一个东西叫做网格。
+strict grid like a spreadsheet or something. There's another thing for that called Grid.
+
+155
+00:12:18,800 --> 00:12:23,760
+您甚至可以将网格视为电子表格或表格视图或类似的东西 - 它适用于当您有行时，
+And Grid you could even almost think of as a spreadsheet or table View or something like
+
+156
+00:12:23,760 --> 00:12:31,120
+重复的行通常一遍又一遍地显示相同类型的数据，
+that—it's for when you have rows, repeated rows usually showing the same kind of data
+
+157
+00:12:31,120 --> 00:12:35,920
+并且您希望能够排列它们的列，甚至排列，就像电子表格中数字中的小数点一样。
+over and over, and you want to be able to line up their columns or even line up, like, the decimal
+
+158
+00:12:35,920 --> 00:12:40,080
+如果电子表格中有数字，则将小数点对齐。
+points in numbers like in a spreadsheet. If you had numbers in a spreadsheet,
+
+159
+00:12:40,080 --> 00:12:43,040
+网格可以让你做到这一点。
+you line the decimal points up. Grid lets you do that.
+
+160
+00:12:43,040 --> 00:12:48,160
+Grid 的工作方式是它是一个容器视图，但它始终包含另一种称为 GridRow 的容器视图。
+And the way Grid works is it's a container View, but it always contains this other kind
+
+161
+00:12:48,160 --> 00:12:52,240
+因此，每一行都有一个 GridRow，
+of container View called GridRow. So each row has a GridRow,
+
+162
+00:12:52,240 --> 00:12:57,200
+并且该 GridRow 几乎总是位于显示每一行的 ForEach 中。
+and that GridRow is almost always in a ForEach which is showing each row.
+
+163
+00:12:57,200 --> 00:13:01,840
+因此，GridRow 指定每行的布局方式、所有列的位置，
+So the GridRow specifies how each row is laid out, where all the columns are,
+
+164
+00:13:01,840 --> 00:13:06,160
+然后 Grid 组合所有 GridRow。同样，它通常位于 ForEach 中。
+and the Grid is then combining all the GridRows. And again, it's usually in a ForEach.
+
+165
+00:13:06,160 --> 00:13:10,480
+关于 Grid 需要了解的一点是，有很多视图修饰器可以帮助您控
+The thing about Grid to know is there's a lot of View modifiers that help you control
+
+166
+00:13:10,480 --> 00:13:15,920
+制诸如在列内排列内容之类的操作，它们都以 .grid 开头。
+things like lining things up inside the columns, and they all start with .grid.
+
+167
+00:13:15,920 --> 00:13:20,960
+因此，如果您查看文档，.grid*，这将是一个视图修饰器，
+So if you'll look in the documentation, .grid*, that's going to be a View modifier
+
+168
+00:13:20,960 --> 00:13:26,960
+它将影响此视图在网格中的 GridRow 中时的显示方式。
+that is going to affect the way this View appears when it's in a GridRow in a Grid.
+
+169
+00:13:26,960 --> 00:13:32,080
+这就是在表格和所有其他东西中垂直和水平放置内容的方式。
+This is how you lay things out vertically and horizontally in tables and all that stuff.
+
+170
+00:13:32,080 --> 00:13:36,480
+还有什么？ScrollView——你已经知道了。超级简单。
+What else is there? ScrollView—you already know about that one. Super simple. I think it only
+
+171
+00:13:36,480 --> 00:13:39,920
+我认为它只有一个参数，那就是你是水平滚动还是垂直滚动。
+has one argument to it, which is whether you're scrolling horizontally or vertically.
+
+172
+00:13:39,920 --> 00:13:45,840
+它还确实有很多 .scroll* 视图修饰器来控制 ScrollView 的工作方式，
+It also does have a lot of .scroll* View modifiers that control how the ScrollView works,
+
+173
+00:13:45,840 --> 00:13:49,920
+例如滚动的位置等。因此，如果您开始做更复杂的 ScrollView 工作，
+like where you are scrolled and things like that. So if you start doing more sophisticated
+
+174
+00:13:49,920 --> 00:13:53,040
+您将进入这些工作，但令人惊讶的是，ScrollView 在大多数时间都可以工作，
+ScrollView work, you'll get into those, but amazingly, ScrollView just works
+
+175
+00:13:53,040 --> 00:13:59,440
+而无需使用任何 .scrollPosition 或任何视图修饰器。
+most of the time without using any of the .scrollPosition or whatever View modifiers.
+
+176
+00:13:59,440 --> 00:14:03,280
+还有一款非常酷的产品，名为 ViewThatFits。
+Then there's a really cool one called ViewThatFits.
+
+177
+00:14:03,280 --> 00:14:08,560
+所以，ViewThatFits——你给它一袋乐高，
+So, ViewThatFits—you give it a bag of Lego and instead of organizing them in a vertical stack
+
+178
+00:14:08,560 --> 00:14:15,040
+它不会将它们组织成垂直堆叠或类似的东西，而是将它们单独放置并挑选最适合的一个。
+or something like that, it lays them all out separately and picks the one that fits the best.
+
+179
+00:14:15,040 --> 00:14:18,800
+这在适配竖屏和横屏等不同布局时非常有用。
+This is super good for things like portrait versus landscape.
+
+180
+00:14:18,800 --> 00:14:22,880
+您可以想象一下，您将数据放入 VStack 中，并且您希望在处于竖屏时显示该数据，
+You can imagine having your data and you put it in a VStack and you want that to appear
+
+181
+00:14:22,880 --> 00:14:25,920
+因为手机又高又瘦，或者放在 HStack 中，以便以其他方式显示。
+when you're in portrait mode because the phone's kind of tall and skinny,
+
+182
+00:14:25,920 --> 00:14:30,560
+或者您甚至可能不太确定，您可能会制作三种不同的布局 - 一个 VStack，
+or in an HStack so that it appears the other way. Or you might even not be quite sure, and you
+
+183
+00:14:30,560 --> 00:14:34,560
+然后可能是一个包含两个 VStack 的 HStack，
+might make three different layouts—a VStack, then maybe an HStack with two VStacks in it,
+
+184
+00:14:34,560 --> 00:14:37,440
+然后是另一个没有 VStack 的 HStack。你明白我的意思吗？
+and then another HStack that's no VStacks. You see what I mean?
+
+185
+00:14:37,440 --> 00:14:41,040
+你可以用多种不同的方式来布置它，
+You can lay it out a bunch of different ways and it'll lay them
+
+186
+00:14:41,040 --> 00:14:45,840
+它会将它们全部布置出来并选择最适合的一个。 “最适合”意味着视图不会被裁剪，
+all out and pick the one that fits the best. And “fits the best” means Views aren't clipped,
+
+187
+00:14:45,840 --> 00:14:50,640
+它们适合，并且使用他们想要的尺寸 - 这种逻辑。
+they fit, and they're using the size that they want—that kind of logic.
+
+188
+00:14:50,640 --> 00:14:55,920
+所以，这是非常聪明的。然后是容器的鼻祖——Form、List、
+So, it's pretty smart about that. Then there's kind of the granddaddies
+
+189
+00:14:55,920 --> 00:15:00,880
+OutlineGroup 和 DisclosureGroup。
+of the containers here—Form and List and OutlineGroup and DisclosureGroup.
+
+190
+00:15:00,880 --> 00:15:07,760
+表单和列表是 VStack 和 ScrollView 和分隔符以及一
+Form and List are kind of combinations of VStack and ScrollView and Divider and a whole
+
+191
+00:15:07,760 --> 00:15:14,160
+大堆视图修饰器的组合，可以在应用程序中以一致的方式呈现事物。
+bunch of View modifiers to present things in a consistent way across applications.
+
+192
+00:15:14,160 --> 00:15:18,720
+表单用于呈现设置等内容。你的设置里有什么？
+Form is for presenting things like settings. What do you have in settings?
+
+193
+00:15:18,720 --> 00:15:23,760
+你有可以输入的文本字段，有复选框，
+You've got text fields you can type in, you got checkboxes, you got on/off switches—you've got
+
+194
+00:15:23,760 --> 00:15:28,560
+有开/关开关——里面有各种用于将信息输入电子表格的东西。
+all kinds of things in there for entering information into an electronic form.
+
+195
+00:15:28,560 --> 00:15:33,680
+Form 做到了这一点，你只需将它们放入乐高包中，它就会将它们完美地摆放在一起，
+And Form makes it so you just put them in the bag of Lego and it lays them all out perfectly,
+
+196
+00:15:33,680 --> 00:15:39,120
+将它们分开，在它们之间放置隔板，使它们看起来是所有人一起生活在 Form 中的正确方式。
+separates them, puts dividers between them, makes them look the right way to all live in
+
+197
+00:15:39,120 --> 00:15:40,400
+这就是形式。
+a Form together. So that’s Form.
+
+198
+00:15:40,400 --> 00:15:43,840
+不管你信不信，几周后我们将在 CodeBreaker 中开发 Form。
+We’ll be doing Form in CodeBreaker, believe it or not, in a couple of weeks.
+
+199
+00:15:43,840 --> 00:15:50,000
+List 用于长列表，所以它有点像 ScrollView 中的大 VStack，
+And then List is for long lists of things, so it’s kind of like a big VStack in a ScrollView except
+
+200
+00:15:50,000 --> 00:15:54,800
+只不过它会自动将分隔线放在那里。它进行选择，以便您可以单击列表中的内容，
+it automatically puts the dividing line in there. It does selection so you can click on things in
+
+201
+00:15:54,800 --> 00:16:01,200
+并跟踪您选择的内容。它有很多列表功能，可用于设计您想要的列表外观。
+the list and it keeps track of what you selected. It’s got a lot of List features for styling it,
+
+202
+00:16:01,200 --> 00:16:04,560
+所以列表和表单——几周后我们也会在
+how you want the list to look. So List and Form—and we’ll use List
+
+203
+00:16:04,560 --> 00:16:07,840
+CodeBreaker 中使用列表——它们非常重要。
+in CodeBreaker as well in a couple of weeks—they’re really important.
+
+204
+00:16:07,840 --> 00:16:11,920
+它们通常是构建应用程序核心的基础。
+They’re fundamental to building the core of your app usually.
+
+205
+00:16:11,920 --> 00:16:15,680
+OutlineGroup 和 DisclosureGroup——如果您有分层数据，
+OutlineGroup and DisclosureGroup—that’s if you have hierarchical data, like let's say if you were
+
+206
+00:16:15,680 --> 00:16:20,240
+例如您正在构建一个显示文件系统的应用程序，其中文件夹内有文件夹，文件夹内有文件。
+building an app that showed the file system, with folders inside folders and files inside folders.
+
+207
+00:16:20,240 --> 00:16:25,040
+DisclosureGroup 就是其中的一部分，因为当您单击“显示此文件夹中的内容”
+And DisclosureGroup is part of that because when you click on “show me what’s in this
+
+208
+00:16:25,040 --> 00:16:28,240
+时，它会向您公开它。这就是
+folder,” it discloses it to you. So that’s what DisclosureGroup
+
+209
+00:16:28,240 --> 00:16:33,840
+DisclosureGroup 所做的——它让您逐渐深入了解一些分层数据，并在进行过程中公开它。
+does—it lets you increasingly go down some hierarchical data, disclosing it as you go.
+
+210
+00:16:33,840 --> 00:16:37,840
+这门课可能不会讲到这些容器视图，但它们用起来很容易，尤其是当你
+Probably won’t get to those in this class, but they’re pretty easy to use, especially once you
+
+211
+00:16:37,840 --> 00:16:42,160
+理解了 Form、List 等视图以后。使用时只是有一些事项需要注意。
+understand Form and List and things like that. It’s just got some things to think about.
+
+212
+00:16:42,160 --> 00:16:46,000
+现在，这些视图——HStack、VStack，以及这里看到的所有视图，
+Now, all of these things—HStack and VStack and all the things you see here and all the
+
+213
+00:16:46,000 --> 00:16:53,680
+再加上上一页的那些——全都实现了一个名为 Layout 的协议。
+things on the previous page—they’re all implementing a protocol called Layout.
+
+214
+00:16:53,680 --> 00:16:58,880
+Layout 协议定义了 sizeThatFits、placeSubviews 等方法。
+And Layout has things in it like sizeThatFits and placeSubviews and all that stuff I was
+
+215
+00:16:58,880 --> 00:17:02,960
+我刚才所说的“容器提出尺寸方案、子视图选择尺寸”的整套协作流程，都属于这个协议。
+talking about—the dance of offering space and taking space—that’s all part of this protocol.
+
+216
+00:17:02,960 --> 00:17:06,320
+你也可以实现自己的容器视图。不过我可以保证，
+You could implement your own container. Now, you’re not going to do that in this class,
+
+217
+00:17:06,320 --> 00:17:09,600
+这门课不会要求你这么做，期末项目也不会——因为这有些复杂。
+I guarantee you, not even for your final project—it’s a little bit sophisticated
+
+218
+00:17:09,600 --> 00:17:13,200
+SwiftUI，但我只是想让你知道，这就是幕后发生的事情：
+SwiftUI—but I just wanted to let you know that’s what’s going on behind the scenes
+
+219
+00:17:13,200 --> 00:17:20,480
+这些东西的行为有一个协议，这样它们就可以跳舞。
+here: there’s a protocol these things are behaving like so they can play that dance.
+220
+00:17:20,480 --> 00:17:23,680
+现在，我想专门讲一下 ZStack。
+Now, I want to talk about ZStack a little bit specially here.
+221
+00:17:23,680 --> 00:17:27,280
+我想大家已经理解了，ZStack 和 HStack、VStack 类似，
+I think you already understand that ZStack is like HStack and VStack,
+222
+00:17:27,280 --> 00:17:33,520
+只不过它沿着朝向用户的方向堆叠视图，让这些视图相互叠放。
+it’s just that it stacks the Views towards you as the user, stacking them on top of each other.
+223
+00:17:33,520 --> 00:17:37,520
+它的尺寸会调整到足以容纳所有子视图。因此，如果其中有一个具备尺寸弹性的视图，
+It sizes to fit all its children, so if it has a flexible View in it,
+224
+00:17:37,520 --> 00:17:42,960
+它也会具备尺寸弹性，因为它会把所有可用空间都提供给这个视图，
+it also will be flexible because it’s going to give all the space it has to its flexible View,
+225
+00:17:42,960 --> 00:17:49,040
+而这个视图又会让 ZStack 具备尺寸弹性。因此，包含弹性视图的 ZStack 也完全具备尺寸弹性。
+and that flexible View is going to make it flexible. So ZStacks with flexible Views are also fully flexible.
+226
+00:17:49,040 --> 00:17:55,200
+不过，如果 ZStack 中只有两个视图，就会出现一种有意思的特殊情况。我们其实已经见过了，
+But there’s an interesting case if you have a ZStack of only two things, and we’ve already seen
+227
+00:17:55,200 --> 00:18:02,160
+那就是 overlay。overlay 就像一个包含两个视图的 ZStack，其中一个视图覆盖在另一个视图之上。
+it: overlay. overlay is just a ZStack with two things in it, where one is overlaid on the other.
+228
+00:18:02,160 --> 00:18:09,360
+但这里的关键是，在这个例子中，只有 Circle 会参与尺寸计算，
+But the trick here is that the sizing is only happening with the Circle here in this case,
+229
+00:18:09,360 --> 00:18:13,520
+覆盖在它上面的视图并不参与。无论在它上面覆盖什么视图，
+not the thing you overlay on top of it. It doesn’t matter what you overlay on top of it—it
+230
+00:18:13,520 --> 00:18:19,360
+都必须适应 Circle 布局完成后的尺寸。因此，你在这里看到的整行代码
+has to fit in however the Circle was laid out. So this whole line that you see right
+231
+00:18:19,360 --> 00:18:24,160
+——Circle.overlay { Text }——在 VStack 或 HStack 中进行布局时，
+here—Circle.overlay { Text }—that is going to be laid out in
+232
+00:18:24,160 --> 00:18:29,520
+会被当作一个 Circle。Text 完全不会参与它的布局计算；
+a VStack or HStack, just like it was a Circle. The Text had nothing to do with its layout,
+233
+00:18:29,520 --> 00:18:34,240
+等布局决定完成以后，Text 才会被直接放到 Circle 上面。
+and then after the layout decisions have been made, the Text is plopped on top of it.
+234
+00:18:34,240 --> 00:18:37,840
+alignment 参数决定 Text 出现的位置，因为 Text 可能比
+And this alignment says where the Text appears because it might be smaller
+235
+00:18:37,840 --> 00:18:41,680
+布局后的 Circle 更小。对齐位置可以是居中、顶部、
+than the Circle that gets laid out. And so there's center, there's top,
+236
+00:18:41,680 --> 00:18:46,240
+左侧、底部、右下角——你可以指定任意想要的对齐位置。
+left, bottom, bottom right—you can put that alignment anywhere you want.
+237
+00:18:46,240 --> 00:18:49,920
+大家都明白包含两个视图的 ZStack 与 overlay 之间的区别了吗？
+So everyone understand the difference between a ZStack of two things and overlay:
+238
+00:18:49,920 --> 00:18:54,400
+区别在于空间的分配方式。在这里，空间只分配给 Circle。
+it has to do with how the space is allocated. It's just allocated to the Circle here.
+239
+00:18:54,400 --> 00:18:58,800
+与此类似，还有一个叫作 background 的视图修饰器。它的工作方式相同，只不过
+And similarly, there is something called background, which is the same thing except
+240
+00:18:58,800 --> 00:19:04,240
+另一个视图位于后面。因此在这个 background 示例中，
+for that the other View is behind. So in this case, this background one,
+241
+00:19:04,240 --> 00:19:08,720
+布局由 Text 决定，而这个 Rectangle.foregroundColor
+the Text determines the layout. And this Rectangle.foregroundColor
+
+242
+00:19:09,680 --> 00:19:13,840
+foregroundColor 位于后面，它将是文本的大小，
+goes in the back and it would be the size of the text because it has to live
+
+243
+00:19:13,840 --> 00:19:19,440
+因为它必须与文本的布局相适应。这对于调试来说非常有价值。
+with whatever the text got laid out to be. And this is really valuable for debugging.
+
+244
+00:19:19,440 --> 00:19:22,720
+为什么这对于调试很有价值？有时，屏幕上有很多视图，
+Why is this valuable for debugging? Sometimes you have a lot of Views on
+
+245
+00:19:22,720 --> 00:19:26,960
+但您不确定哪个视图正在绘制什么，因为它们都是间隔开的。
+screen and you're just not sure which View is drawing what because it’s all spaced out.
+
+246
+00:19:26,960 --> 00:19:30,400
+也许它们的间距不是您想要的。你会想，为什么这么疏远？
+Maybe they're not spaced the way you want. You're like, why is that so spaced out that way?
+
+247
+00:19:30,400 --> 00:19:35,600
+您想了解 - 只需选择关键视图并放置 .background.
+And you want to understand—just pick key Views and put .background.foregroundColor)
+
+248
+00:19:36,480 --> 00:19:40,240
+foregroundColor）或绿色矩形或黄色矩形，
+or green Rectangle or yellow Rectangle and it will fill the
+
+249
+00:19:40,240 --> 00:19:46,400
+它会填满整个视图，因为 background 会让 Rectangle 遵循前景视图确定的布局。
+entire View because that's what background does. It makes that Rectangle obey the layout of the
+
+250
+00:19:46,400 --> 00:19:53,200
+因此，添加 .background.foregroundColor(*some color*))，
+thing that you put it on. So adding .background.foregroundColor(*some color*)) and maybe even two or three of them
+
+251
+00:19:53,200 --> 00:19:57,840
+甚至可能其中两个或三个具有不同颜色的不同视图是查看正在发生的情况的好方法。
+with different Colors to different Views in there is a great way to see what's going on.
+
+252
+00:19:57,840 --> 00:20:02,320
+调试很棒，因为调试视图并不总是那么简单和容易。
+Great debugging thing because debugging Views is not always so simple and so easy.
+
+253
+00:20:02,320 --> 00:20:05,040
+这并不像调试命令式代码那么容易。
+It's not quite as easy as debugging imperative code.
+
+254
+00:20:05,040 --> 00:20:11,040
+您不能过多使用调试器，对吧？因为您所有的视图 - 他们的代码
+You can't use the debugger as much, right? Because all your Views—their code is only
+
+255
+00:20:11,040 --> 00:20:16,000
+只有当系统认为“需要重新计算这个 var body”时，相关代码才会运行，
+being run when the system says, “I need that var body to be rebuilt,” and it's
+
+256
+00:20:16,000 --> 00:20:19,680
+而且系统不会每次都重新计算所有视图的 body，
+not always rebuilding every var body. It's only rebuilding the var bodies
+
+257
+00:20:19,680 --> 00:20:22,320
+只会重新计算实际发生变化的那些 body。因此，
+that actually have changed. So sometimes it's a little
+
+258
+00:20:22,320 --> 00:20:26,400
+有时很难在脑中判断到底是哪一个视图发生了变化、
+tricky to think in your mind which actual helicopter View is changing
+
+259
+00:20:26,400 --> 00:20:30,720
+哪一个视图的 body 正在重新计算，调试起来会有些棘手。
+here, whose var body is getting rebuilt, and so it can be tricky.
+
+260
+00:20:30,720 --> 00:20:35,200
+但这是查看谁在画什么的好方法。
+But this is a great way to just see who's drawing what.
+
+261
+00:20:35,200 --> 00:20:40,640
+有时隐藏的另一件事是布局中涉及视图修饰器。
+The other thing that's sometimes hidden is that View modifiers are involved in layout.
+
+262
+00:20:40,640 --> 00:20:44,880
+像 padding 这样的视图修饰器——比方说——它几乎就像
+A View modifier like padding—let's say—it's almost like padding is a
+
+263
+00:20:44,880 --> 00:20:49,120
+padding 是一个小容器，里面包含了一些东西，周围还有一些 padding。
+little container that contains the thing inside of it with some padding around it.
+
+264
+00:20:49,120 --> 00:20:54,720
+所以你可以把它想象成一个容器视图，它玩同样的游戏。
+So you can kind of think of it as a container View and it kind of plays this same game.
+
+265
+00:20:54,720 --> 00:20:58,400
+但其他视图修饰器（例如字体）对布局没有影响。
+But other View modifiers like font—no effect on layout.
+
+266
+00:20:58,400 --> 00:21:02,960
+他们绝对不以任何方式参与其中。尽管它们会影响 Text 的绘制方式，
+They're absolutely not involved in any way in it. Even though they affect the way the Text draws,
+
+267
+00:21:02,960 --> 00:21:07,760
+但这取决于 Text 来做出决定。字体修饰器本身实际上并没有做到这一点。
+that's up to the Text to make that decision. Font modifier itself doesn't actually do it.
+
+268
+00:21:07,760 --> 00:21:13,200
+但是内边距和纵横比是影响布局的两个很好的例子。
+But padding and aspectRatio are two great examples of things that do affect layout.
+
+269
+00:21:13,200 --> 00:21:17,600
+那么让我们看看填充以及它如何玩提供空间的游戏。
+So let's look at padding and how it plays the game of offered space.
+270
+00:21:17,600 --> 00:21:21,040
+看看这里有什么？一个加了 .padding 的 Text。
+You see what we have here? Text with .padding around it.
+
+271
+00:21:21,040 --> 00:21:24,640
+大家都知道它的作用：它会取得一个 Text，然后在
+Everyone knows what this does: takes a Text and it's going to put 10 points
+
+272
+00:21:24,640 --> 00:21:28,320
+它的四周各加上 10 点的 padding，让它比 Text 更大。
+of padding around all sides of it, so it can make it bigger than the Text.
+
+273
+00:21:28,320 --> 00:21:31,920
+然后，我可能会把它放进 VStack 或 HStack。
+And I might be throwing this into a VStack or an HStack.
+
+274
+00:21:31,920 --> 00:21:36,400
+其实，你可以把整个黄色部分看成一个 View——这里就叫它“黄色 View”吧。
+In fact, imagine this whole yellow thing is a View—I'm going to call it "the yellow View".
+
+275
+00:21:36,400 --> 00:21:39,920
+而且它确实是一个 View，因为 padding 是一个 View modifier。
+And in fact, it is a View because padding is a View modifier.
+
+276
+00:21:39,920 --> 00:21:43,520
+View modifier 返回的是什么？是一个 View，对吧？
+What do View modifiers return? A View, right?
+
+277
+00:21:43,520 --> 00:21:48,240
+它返回的是某种表现得像 View 的东西。所以整个黄色表达式就是一个 View。
+They return something that behaves like a View. So that yellow—that entire expression—is a View.
+
+278
+00:21:48,240 --> 00:21:53,600
+接下来，我们来看看在布局系统中，这个 View 是如何参与 VStack 布局的。
+So we're going to talk about how that View participates in a VStack with the layout system.
+
+279
+00:21:53,600 --> 00:21:59,120
+首先，这个黄色 View 的尺寸弹性继承自里面的 Text。
+First thing is that yellow View's flexibility—well, it inherits that from the Text.
+
+280
+00:21:59,120 --> 00:22:03,520
+如果 Text 有尺寸弹性，加上 padding 后也会有；但这里的 Text 没有尺寸弹性，
+If the Text is something flexible, then the padding is going to be flexible, and Text is not.
+
+281
+00:22:03,520 --> 00:22:06,240
+所以加上 padding 后也不会有。也就是说，整个黄色 View
+So this padding will not be. That entire yellow View
+
+282
+00:22:06,240 --> 00:22:10,560
+都不具尺寸弹性，因此它会最先收到尺寸方案。
+is not going to be flexible. So it will be offered space first.
+
+283
+00:22:10,560 --> 00:22:17,040
+整个黄色 View 会最先收到空间方案。接下来进行布局时，VStack 把空间方案交给黄色 View，
+The whole yellow View will be offered space first. Then during layout, as the yellow View is offered
+
+284
+00:22:17,040 --> 00:22:22,320
+它会接下这份空间方案，然后转过身来，
+that space by the stack, it'll take the space that's offered to it and then turn around,
+
+285
+00:22:22,320 --> 00:22:25,680
+从四边各减去 10 点，因为它知道自己需要留出 10 点的 padding。
+reduce it by 10 points because it knows it has to pad it by 10 points.
+
+286
+00:22:25,680 --> 00:22:31,200
+于是，它把空间方案从四边各缩减 10 点，再交给 Text；然后由 Text 选择
+So it reduces it by 10 points and it offers it to the Text, and then the Text chooses its
+
+287
+00:22:31,200 --> 00:22:39,520
+自己的尺寸，padding 再把这 10 点加回来。所以，如果我把这个黄色 View 放进 VStack，
+own size and then the padding adds the 10 back. So, if I had this yellow View inside of a VStack
+
+288
+00:22:39,520 --> 00:22:43,600
+即使 VStack 有很大的可用空间，整个黄色 View 仍然会很小。
+and there was a lot of space to be had, this whole yellow View would still be pretty small.
+
+289
+00:22:43,600 --> 00:22:46,480
+它只会比里面的 Text 在四周各大 10 点，
+It would just be 10 points bigger than the Text would be in there
+
+290
+00:22:46,480 --> 00:22:51,520
+因为它会把自己收缩回实际需要的尺寸。布局协商就是这样进行的，完全符合
+because it would size itself back down. That's how it plays the game—exactly
+
+291
+00:22:51,520 --> 00:22:55,920
+你的预期。所以，View modifier 也可以参与布局过程。
+how you would expect there. So View modifiers can be involved.
+
+292
+00:22:55,920 --> 00:22:59,680
+现在，我要回到这里的演示。我想谈的第一件事是作业一。
+Now, I'm going to go back to the demo here. The first thing that I want to
+
+293
+00:22:59,680 --> 00:23:03,360
+作业一中发生的一件事是——记住，
+talk about is assignment one. And one of the things that happened
+
+294
+00:23:03,360 --> 00:23:07,600
+我知道你们都在做作业二，我知道你们可能已经快完成作业二了，
+in assignment one—remember, I know you're all working on assignment two, I know you're probably
+
+295
+00:23:07,600 --> 00:23:12,160
+对吧？但无论如何——作业一，如果你还记得的话，
+already almost done with assignment two, right? But anyway—assignment one, if you remember it,
+
+296
+00:23:12,160 --> 00:23:16,480
+你正在做匹配标记，对吧？你把那些匹配标记放在那里。
+you were doing the MatchMarkers, right? You put those MatchMarkers in there.
+
+297
+00:23:16,480 --> 00:23:19,840
+你们中的许多人在这方面确实做得很好。
+And a number of you really did a great job with that.
+
+298
+00:23:19,840 --> 00:23:25,760
+有句老话说，我和一个人一起工作，他过去总是喜欢在几乎
+And there's an old saying that I worked with a guy who used to love to say this all the time
+
+299
+00:23:25,760 --> 00:23:30,400
+任何问题上都这么说——计算机科学中只有三个数字。
+about almost any problem—that there are only three numbers in computer science.
+
+300
+00:23:30,400 --> 00:23:35,360
+有人听过这个吗？你知道计算机科学中的三个数字是什么吗？只有三个。
+Has anyone ever heard this? You know what the three numbers in computer science are? There's only three.
+
+301
+00:23:35,360 --> 00:23:42,480
+有零、一和 n。并且您的代码应该始终只执行这三个数字
+There's zero, one, and n. And that your code should always only do one of
+
+302
+00:23:42,480 --> 00:23:46,880
+之一或所有这三个数字。这意味着，当您遇到像这样的问题时（MatchMarkers）
+those three numbers or all three of those numbers. And what that means is that when you have
+
+303
+00:23:46,880 --> 00:23:51,680
+，如果有零个标记，它应该有效，如果只有一个标记，
+a problem like this—MatchMarkers—it should work if there's zero markers,
+
+304
+00:23:51,680 --> 00:23:55,680
+它应该有效，并且它应该适用于所有其他数字。
+it should work if there's only one, and it should work for all other numbers.
+
+305
+00:23:55,680 --> 00:23:59,200
+你们中的一些人也这么做了。你的做法非常聪明。
+And some of you did that. And the way you did it was really smart.
+
+306
+00:23:59,200 --> 00:24:06,640
+你在身体里，你只需做了几个 ForEach，
+You had in here in the body, you just did a couple of ForEach and then the
+
+307
+00:24:06,640 --> 00:24:12,000
+然后匹配可以是任何东西。这太棒了。这确实表明您确实了解我们在做什么。
+matches could be anything. And it was fantastic. It really showed me you really understood what we were doing.
+
+308
+00:24:12,000 --> 00:24:15,680
+所以，所有这样做的人，都值得称赞。我真的没想到会这样。
+So all of you who did that, kudos. I wasn't really expecting that.
+
+309
+00:24:15,680 --> 00:24:20,320
+我只是希望你在这里放一点“如果”，表示如果有五个或六个，
+I was just expecting you to put a little if right in here that says if there's
+
+310
+00:24:20,320 --> 00:24:23,920
+则再做一个 VStack。我会同意的。
+five or six then do another VStack. I would have been fine with that.
+
+311
+00:24:23,920 --> 00:24:26,480
+你们中那些这样做的人也做得很好。
+And those of you who did that—you did a great job too.
+
+312
+00:24:26,480 --> 00:24:30,160
+但是你们 ForEach 人在做零、一或 n，而你们做了 n。
+But you ForEach people were doing the zero, one or n and you did n.
+
+313
+00:24:30,160 --> 00:24:34,880
+不幸的是，当你执行 n 时，你打破了零，因为它让你陷入这样的情况：
+Unfortunately, when you did the n, you broke the zero because it left you in a case where
+
+314
+00:24:34,880 --> 00:24:39,520
+当匹配项为空时，你什么也没画。您没有视图，因为您有两个 ForEach，
+when matches was empty, you drew nothing. You had no Views because you had two ForEach
+
+315
+00:24:39,520 --> 00:24:44,560
+而这两个 ForEach 从未创建视图，因为没有匹配项。
+and those two ForEach never created a View because there was no matches.
+
+316
+00:24:44,560 --> 00:24:47,760
+所以我知道你们中的一些人遇到了这个问题，我们在 Ed 讨论中讨论了这个问题，
+So I know some of you had this problem and we talked about it in an Ed discussion and
+
+317
+00:24:47,760 --> 00:24:52,320
+并且我们尝试了不同的解决方案 - 就像我们可能会这样做，这样即使匹配是空的，
+we went through different solutions—like maybe we make it so that even if matches is empty,
+
+318
+00:24:52,320 --> 00:24:54,960
+它也总是会抽到至少一个。那行得通。
+it always draws at least one. That would work.
+
+319
+00:24:54,960 --> 00:24:59,840
+或者你们中的一些人回去后，不再让主代码或猜测的匹配为空，
+Or some of you went back and instead of having matches be empty for a master code
+
+320
+00:24:59,840 --> 00:25:07,680
+而是将其设为不匹配、不匹配、不匹配、不匹配，对吗？四个不匹配的人。这也解决了问题。
+or a guess, you had it be nomatch, nomatch, nomatch, nomatch, right? Four nomatch'es. That solved the problem as well.
+
+321
+00:25:07,680 --> 00:25:10,320
+但我认为最好谈谈，好吧，
+But I thought it would be good to talk about, okay, what would be
+
+322
+00:25:10,320 --> 00:25:14,640
+什么才是解决这个问题的真正好办法。为什么我们会遇到这个问题？
+really a good solution to this problem. And why are we having this problem?
+
+323
+00:25:14,640 --> 00:25:17,920
+为什么会出现归零的问题呢？好吧，实际上，
+Why did the zero problem happen? Well, really what we did to
+
+324
+00:25:17,920 --> 00:25:22,640
+我们通过执行 ForEach 对 MatchMarkers 所做的是，
+MatchMarkers by doing ForEach is we made it so that it behaved differently in the
+
+325
+00:25:22,640 --> 00:25:27,040
+我们使其在布局方面的零情况下表现有所不同。
+zero case in terms of its layout. I just talked to you about layout
+
+326
+00:25:27,040 --> 00:25:33,840
+我刚刚与您讨论了布局，MatchMarkers 从完全具备尺寸弹性到完全不具尺寸弹性的零大小，
+and MatchMarkers went from fully flexible to completely inflexible zero size and it
+
+327
+00:25:33,840 --> 00:25:38,320
+这仅取决于您传递的参数。通常你不想这样做。
+just depended on the argument you passed. And generally you don't want to do that.
+
+328
+00:25:38,320 --> 00:25:44,800
+视图通常希望在布局方面表现相同（0、1 或 n）。
+Views generally want to behave the same—0, 1, or n—in terms of their layout generally.
+
+329
+00:25:44,800 --> 00:25:49,520
+我说一般是因为我敢打赌，在某些情况下，你不会想真正这样做。
+And I say generally because I bet there are cases where no, you wouldn't want to actually do that.
+
+330
+00:25:49,520 --> 00:25:54,960
+但在大多数情况下，您会想要这样做。同样，解决此问题的一种方法是，
+But for the most part, you'd want to do that. Again, a way to solve this here is you could
+
+331
+00:25:54,960 --> 00:26:00,560
+您可以只说如果 matches 为空，则执行清除矩形，否则执行此操作。
+just say if matches is empty, then do a clear Rectangle, else do this.
+
+332
+00:26:00,560 --> 00:26:04,400
+这将是一种方法。或者就像我说的，这里解决了问题，
+That would be one way to do it. Or like I say, this one here solves the problem
+
+333
+00:26:04,400 --> 00:26:10,160
+因为在这里我总是为每个匹配标记放置一个圆圈，无论是否没有。
+because here I always do put a Circle for every match marker whether there's none of them or not.
+
+334
+00:26:10,160 --> 00:26:15,120
+下面的那个圆圈——但那个圆圈有时会被透明填充和描边。
+That Circle down there—but that Circle sometimes is filled and stroked with clear.
+
+335
+00:26:15,120 --> 00:26:18,960
+所以，它仍然在那里，仍然占据空间。它仍然导致它成为完全具备尺寸弹性的 VStack 和 HStack，
+So, it's still there, still taking up space. It's still causing this to be a fully flexible
+
+336
+00:26:18,960 --> 00:26:24,000
+因为 Circle 在宽高比内是完全具备尺寸弹性的。
+VStack and HStack because Circle is fully flexible within the aspect ratio.
+
+337
+00:26:24,000 --> 00:26:27,040
+所以，这实际上解决了问题。但对于 ForEach，
+So, this actually solves the problem. But with the ForEach's, you might
+
+338
+00:26:27,040 --> 00:26:31,520
+您可能需要在其中添加一些额外的内容。但我实际上想退后一步问：
+have to put some extra if in there. But I actually want to step back and ask:
+
+339
+00:26:31,520 --> 00:26:42,160
+我们这样做是否正确，以便在我们的模型中，我们有代码并且这里有匹配项，
+were we right to make it so that over here in our Model where we had code and we had
+
+340
+00:26:42,160 --> 00:26:49,520
+当它是猜测或主代码时，我们返回空数组？
+matches here we return empty Array when it's a guess or the master code?
+
+341
+00:26:49,520 --> 00:26:58,880
+这是正确的吗？这在语义上真的正确吗？我要说不。为什么？
+Was that correct? Was that really semantically right? And I'm going to claim no. Why?
+
+342
+00:26:58,880 --> 00:27:05,680
+因为猜测和主码确实匹配。所以说他们的匹配毫无意义，也不太对。
+Because guess and master code do have matches. So to say that their matches are nothingness,
+
+343
+00:27:05,680 --> 00:27:08,320
+实际上，我们在这个 matches var 中想说的是，
+it's just not quite right. Really, what we're trying to
+
+344
+00:27:08,320 --> 00:27:14,160
+对于猜测和主代码来说，这是没有意义的。
+say in this matches var is, for guess and master code, this makes no sense.
+
+345
+00:27:14,160 --> 00:27:17,120
+询问主代码的匹配是没有意义的。
+It makes no sense to ask for the matches of the master code.
+
+346
+00:27:17,120 --> 00:27:18,880
+我们知道那是什么。
+We know what that is. And it makes no sense to
+
+347
+00:27:18,880 --> 00:27:20,960
+询问猜测的结果是没有意义的。
+ask for the of the guess. You're not supposed to know
+
+348
+00:27:20,960 --> 00:27:27,440
+在你尝试之前你不应该知道这一点。那么，我们都知道，
+that until you make an attempt. So, what type do we all know that we often
+
+349
+00:27:27,440 --> 00:27:32,400
+当某些事情没有意义时，我们经常会使用什么类型呢？那会是什么？
+would use when something makes no sense? What would that be?
+
+350
+00:27:32,400 --> 00:27:36,000
+Optional（可选值）。没错，我们会使用 Optional。因此，
+Optional. Exactly. We use an Optional. And so, I would suggest
+
+351
+00:27:36,000 --> 00:27:40,640
+我的建议是让 matches 返回一个 Optional，
+that the way to do this is actually have matches here return an Optional<>
+
+352
+00:27:42,080 --> 00:27:48,400
+如果这还不是一次有效的猜测，就返回 nil，而不是空数组。
+and that if it's not an attempt, then this instead of returning empty would return nil.
+
+353
+00:27:48,400 --> 00:27:51,840
+也就是通过 matches 表明：此时还不存在有意义的匹配结果。
+Basically returning here from matches saying this makes no sense.
+
+354
+00:27:51,840 --> 00:27:55,440
+你正在查询这段 code 的 matches，但它此时没有意义。
+You ask for the matches of this code. That makes no sense.
+
+355
+00:27:55,440 --> 00:27:58,720
+因为它还是主代码或尚未提交的猜测，所以没有匹配结果。
+That's because it's a master code or a guess. But it makes no sense.
+
+356
+00:27:58,720 --> 00:28:04,560
+这样修改之后，当然会让这里的现有代码报错，
+Now, if we do this, of course, it breaks our code back here because
+
+357
+00:28:04,560 --> 00:28:10,000
+因为 MatchMarkers 接受的是 [Match]，而不是 Optional<[Match]>。
+MatchMarkers, it takes an . It doesn't take an Optional<>.
+
+358
+00:28:10,880 --> 00:28:16,320
+错误信息会说：可选类型 [Match]? 的值必须先解包为 [Match]。
+So, you can say value of type Optional<Match>? must be unwrapped to a value of Match.
+
+359
+00:28:16,320 --> 00:28:20,800
+顺便说一下，unwrap（解包）就是使用 !、if let 等方式取出 Optional 中的值。
+By the way, that phrase unwrap, that means using "!" or if let
+
+360
+00:28:20,800 --> 00:28:29,200
+例如写成 if let matches = code.matches。
+or something like that to get it out of there. If I can let matches equal the Code's matches.
+
+361
+00:28:29,200 --> 00:28:33,120
+这样就是在解包 Optional 类型的 code.matches。
+So, I'm unwrapping this code.matches, which is an Optional.
+
+362
+00:28:33,120 --> 00:28:37,360
+我们刚刚把它改成了 Optional，然后把解包后的 matches 传到这里。
+We just change it to an Optional. Then I'll put this in here.
+
+363
+00:28:37,360 --> 00:28:42,000
+这样就修复了编译错误。再看看右边发生了什么？
+So, that fixes the compile time error. What happens on the right?
+
+364
+00:28:42,000 --> 00:28:48,240
+糟糕，还是不对：“Guess”按钮不见了，色钉一直铺满了整行。
+Uh oh, that didn't work because where's my guess Button and my pegs go all the way across.
+
+365
+00:28:48,240 --> 00:28:52,480
+这正是使用 ForEach 的人在这里看到的问题。
+So this is exactly the problem those of you who using ForEach were seeing right here.
+
+366
+00:28:52,480 --> 00:28:56,880
+这并没有解决问题，因为 code.matches 可能是 nil。
+This is not fixing the problem because what if code.matches is nil?
+
+367
+00:28:56,880 --> 00:29:02,160
+如果是 nil，我们甚至不会创建 MatchMarkers。因此在 code.matches 为 nil 时，
+Then we don't even do that MatchMarkers thing. So if that MatchMarkers thing is nil,
+
+368
+00:29:02,160 --> 00:29:05,680
+我们需要做其他事情。所以也许我们可以尝试这个
+we need to do something else. So maybe we could try
+
+369
+00:29:05,680 --> 00:29:14,560
+——否则就把它放在那里。这就是“Guess”按钮。那么，让我们输入“Guess”按钮。对。
+this--else put this in there. This is that guess Button. So, let's put the guess Button in. Right.
+
+370
+00:29:14,560 --> 00:29:17,360
+哎呀。那没有做正确的事。
+Whoops. That didn't do the right thing.
+
+371
+00:29:17,360 --> 00:29:22,240
+它输入了“Guess”按钮，但它很大。为什么这个“Guess”按钮 这么大？
+It put the guess Button in, but it's huge. Why is that guess Button huge?
+
+372
+00:29:22,240 --> 00:29:28,240
+因为“Guess”按钮 是一个字体为80 的 Button。
+Because the guess Button is a Button with a font of 80.
+
+373
+00:29:28,240 --> 00:29:31,440
+是的，它会缩小到更小，
+And yes, it'll scale down to smaller, but it's using all the
+
+374
+00:29:31,440 --> 00:29:35,840
+但它会利用它可以利用的所有空间。并且垂直向下有足够的空间。
+space it can get its hands on right there. And there's plenty of space down vertically.
+
+375
+00:29:35,840 --> 00:29:39,360
+所以，这也不是我们真正想要的。
+So, that's not really doing what we want either really.
+
+376
+00:29:39,360 --> 00:29:44,960
+我们希望这个“猜测”停留在与其中一个色钉大小相同的空间中。
+We want that "guess" to stay in a space that's the same size as one of the pegs.
+
+377
+00:29:44,960 --> 00:29:50,800
+看看这些色钉。它们是圆角矩形。这是一根色钉。这里的整件事就是一个
+And look at these pegs. They are RoundedRectangles. This is one peg. This whole thing right
+
+378
+00:29:50,800 --> 00:29:53,920
+RoundedRectangle。那是一根色钉。
+here is one RoundedRectangle. That is one peg.
+
+379
+00:29:53,920 --> 00:30:00,400
+因此，我认为正确的解决方案是将这段代码放在这里，将所有这些都覆盖在一个清晰
+So the right solution I think here is to have this code right here, all this right
+
+380
+00:30:00,400 --> 00:30:08,480
+的 RoundedRectangle 上。因为根据定义，我的 ForEach 具有
+here be overlaid on a clear RoundedRectangle. Because by definition then my ForEach's that
+
+381
+00:30:08,480 --> 00:30:13,200
+RoundedRectangle 的布局将被视为与此 MatchMarkers 区域相同，
+have the RoundedRectangle is going to be treated the same in layout as this
+
+382
+00:30:13,200 --> 00:30:17,040
+猜测为 Button。所以我在这里可以很轻松地做到这一点。
+MatchMarkers area with the guess Button. So I can do that really easily here.
+
+383
+00:30:17,040 --> 00:30:23,120
+我只想说为我创建一个前景样式为 clear 的矩形。
+I'm just going to say create me a Rectangle which has a foregroundStyle of clear.
+
+384
+00:30:23,120 --> 00:30:27,120
+我可能希望它保持正方形，以匹配这个视图的宽高比。
+And I probably want to be square to match this guy's aspect ratio up here.
+
+385
+00:30:27,120 --> 00:30:34,400
+看看他是方的。所以我也要让我的也是方形的。内容模式：.fit。
+See he's square. So I'm going to have mine also be square. contentMode: .fit. And then I'm just
+
+386
+00:30:34,400 --> 00:30:41,120
+然后我要把这个东西覆盖在它上面。因为我们知道覆盖层是从该矩形中获取布局处理的，
+going to overlay this thing on top of it. So because we know overlay gets its layout
+
+387
+00:30:41,120 --> 00:30:47,280
+所以这就是有效的。看看那个。效果非常好。所以这可能是最好的解决方案，
+treatment from that Rectangle, this just works. Look at that. It's worked perfectly. So this is probably the
+
+388
+00:30:47,280 --> 00:30:52,880
+主要是因为我将其与 ForEach 内的解决方案相匹配。
+best solution mostly because I'm matching this with the ones inside the ForEach.
+
+389
+00:30:52,880 --> 00:30:58,960
+所以我得到了我在语义上想要的东西，即五个大小相同的空格，
+So I'm getting what I semantically want, which is five spaces all the same size, the four pegs
+
+390
+00:30:58,960 --> 00:31:03,760
+四个色钉和标记或这里的猜测。希望如果我在这里猜测的话，
+and the markers or the guess over here. And hopefully if I put a guess in here,
+
+391
+00:31:03,760 --> 00:31:09,360
+匹配标记也适合那个小空间。他们确实如此。如果您发现尺寸很奇怪
+the MatchMarkers are also fitting in that little space. And they are. And if you get weird sizing
+
+392
+00:31:09,360 --> 00:31:13,200
+并且事情没有按照您想要的方式调整尺寸，那么您需要开始考虑布局。
+and like things aren't sizing the way you want, then you want to start thinking about the layout.
+
+393
+00:31:13,200 --> 00:31:20,240
+这是如何安排的？这里什么是完全具备尺寸弹性的？什么不是？在你的脑海里走一遍。
+How is this being laid out? What's fully flexible here? What's not? Kind of walk it through in your mind.
+
+394
+00:31:20,240 --> 00:31:24,960
+好吧，我们去参加这场匹配吧。我在 Ed 讨论上发帖。
+All right, let's go do this match. I posted on Ed discussion.
+
+395
+00:31:24,960 --> 00:31:28,560
+我说，看看这个，看看你是否能弄清楚它是如何工作的。
+I said, go look at this and see if you can figure out how it works.
+
+396
+00:31:28,560 --> 00:31:32,080
+有多少人这样做过？好吧，大约有一半。
+How many people did that? Okay, about half of you.
+
+397
+00:31:32,080 --> 00:31:37,120
+因此，我将快速了解 Match 如何与此处的其他代码进行匹配。
+So, I'm going to quickly go through how Match is matching against this other code here.
+
+398
+00:31:37,120 --> 00:31:44,240
+它获取两个代码并为每个色钉返回一个精确或不精确或不匹配的值，
+And it's taking the two codes and returning an with exact or inexact or nomatch for each
+
+399
+00:31:44,240 --> 00:31:48,960
+无论它是否与其他代码匹配。所以，我首先创建一个可写的 var，
+of the pegs, whether it matches the other code. So, I'm starting out by creating a
+
+400
+00:31:48,960 --> 00:31:54,560
+看看它是一个 var，它一开始都是不匹配的。
+writable var, see it's a var , which starts out all nomatch.
+
+401
+00:31:54,560 --> 00:31:58,000
+然后我将进行两次传递。第一次是找到完全匹配的，
+And then I'm going to make two passes. One to find the ones that are exact
+
+402
+00:31:58,000 --> 00:32:02,560
+第二次是找到不完全匹配的。
+matches and a second pass to find the ones that are inexact matches.
+
+403
+00:32:02,560 --> 00:32:08,880
+一路上，我用这个色钉来匹配另一个可写的，你看，可写数组，
+Along the way, I have this pegs to match another writable, you see, writable Array,
+
+404
+00:32:08,880 --> 00:32:12,800
+它是其他代码中的色钉。我需要这个色钉来匹配的原因是
+which is the pegs in the other code. And the reason I need this pegs to match
+
+405
+00:32:12,800 --> 00:32:17,440
+每次我匹配一个色钉时，我都会从这个色钉数组中取出它来匹配，
+is every time I match one, I'm going to take it out of this Array of pegs to match because
+
+406
+00:32:17,440 --> 00:32:22,640
+因为我不想让任何色钉匹配两次。就像它是一个精确匹配，
+I never want any peg to match twice. Like it's an exact Match and then
+
+407
+00:32:22,640 --> 00:32:25,920
+然后它出现并且与另一个位置的某个色钉不精确匹配。
+later it comes along and it matches inexact from some peg in another spot.
+
+408
+00:32:25,920 --> 00:32:27,760
+我不想要这样。因此，
+I don't want that. So every time something
+
+409
+00:32:27,760 --> 00:32:33,760
+每当某些内容不精确或精确匹配时，我都会将其从其他代码中取出，这样我就无法再次匹配它。
+matches inexact or exact, I take it out of the other code so that I can't match it again.
+
+410
+00:32:33,760 --> 00:32:38,320
+这些 for 循环的工作方式是，我们只针对 over 集合。
+And the way these for loops work, we only for over collections.
+
+411
+00:32:38,320 --> 00:32:46,320
+这是 Swift 中唯一的 for 类型。因此，我们在这里讨论色钉指数。
+That's the only kind of for we have in Swift. So we are here for-ing over the pegs' indices.
+
+412
+00:32:46,320 --> 00:32:50,640
+这就是色钉的 0、1、2、3。我们正在扭转这一局面。
+So that's the 0, 1, 2, 3 of the pegs. And we're reversing it.
+
+413
+00:32:50,640 --> 00:32:54,560
+我要倒退，因为我将删除那些精确的匹配钉。
+And I'm going backwards because I'm going to be removing those exact Match pegs.
+
+414
+00:32:54,560 --> 00:32:58,640
+我不想将其从我即将检查的位置中删除。
+And I don't want to be removing it from the positions that I'm just about to check.
+
+415
+00:32:58,640 --> 00:33:02,240
+所以我要倒退，最后我会移除色钉。
+So I'm going to go backwards and I'll be removing the pegs at the end.
+
+416
+00:33:02,240 --> 00:33:07,440
+然后在这个 for 循环中就非常简单了。
+And then inside this for loop is really easy. I'm just saying as long as the pegs to
+
+417
+00:33:07,440 --> 00:33:09,760
+我只是说只要匹配的色钉有这个索引。
+match have this index. So here I'm just making
+
+418
+00:33:09,760 --> 00:33:14,160
+所以在这里我只是确保不会出现索引越界错误。然后我将查看主代码，
+sure I don't get an index out of bounds error. Then I'm going to look in the master code and
+
+419
+00:33:14,160 --> 00:33:17,600
+看看它是否等于我的色钉。大家都明白了吗？
+see if it equals my pegs. Everybody got that?
+
+420
+00:33:17,600 --> 00:33:21,920
+如果是的话，哇哦，我有一个完全匹配的。我把它从色钉上取下来，
+And if it is, woohoo, I have an exact match. And I remove it from the pegs because I'm
+
+421
+00:33:21,920 --> 00:33:26,000
+因为每次匹配时我都会把它取下来。然后，
+removing every time I have a match. And then once I've got this results
+
+422
+00:33:26,000 --> 00:33:31,360
+一旦我在这里得到这个结果，现在就混合了不匹配和精确的结果。
+thing up here, now is a mix of nomatch and exact for the ones that are exact.
+
+423
+00:33:31,360 --> 00:33:35,760
+然后在这里，我只是再次检查索引，
+And then in here, I'm just going through the indices again and I'm saying if I didn't have
+
+424
+00:33:35,760 --> 00:33:41,040
+我说如果我没有与该色钉完全匹配，那么我将查看其余的色钉。
+an exact match for this peg, then I'm going to look in the remaining pegs.
+
+425
+00:33:41,040 --> 00:33:45,200
+好的，这些要匹配的色钉是剩下的不匹配的色钉。
+Okay, these pegs to match are the leftover non-matching pegs.
+
+426
+00:33:45,200 --> 00:33:49,040
+我去看看里面有没有如果是的话，现在我有一个不精确的匹配，
+I'm going to see if it's in there. And if it is, now I have an inexact match and
+
+427
+00:33:49,040 --> 00:33:52,160
+我将把它从主代码中删除。很简单。
+I'm going to remove it from the master code. Pretty simple.
+
+428
+00:33:52,160 --> 00:33:57,360
+这并不是非常复杂，但我实际上想改变这一点并向您展示如何使用函
+This is not super sophisticated, but I actually want to change this and show you how we would do
+
+429
+00:33:57,360 --> 00:34:01,280
+数式编程来做到这一点，因为函数式编程是您最终必须在
+this with functional programming because functional programming is a skill you're
+
+430
+00:34:01,280 --> 00:34:04,800
+Swift 中掌握的一项技能。因此，在这里我将向您展示采用完全相同的代码的示例，
+going to have to eventually master in Swift. So, here I'm just going to show you example
+
+431
+00:34:04,800 --> 00:34:08,880
+相同的策略，一切都相同，但我将使用函数式编程来完成它，
+of taking this exact code, same strategy, everything same, but I'm going to do it with
+
+432
+00:34:08,880 --> 00:34:14,480
+它非常简单，而且实际上使该代码看起来更好一点。
+functional programming and it's really easy and it actually makes this code look a little bit nicer.
+
+433
+00:34:14,480 --> 00:34:19,360
+我将在这里使用的函数式编程函数称为 map。
+The functional programming function I'm going to use here is called map.
+
+434
+00:34:19,360 --> 00:34:23,840
+任何了解任何语言的函数式编程的人都知道映射。
+Anyone who knows about functional programming in any language knows about map.
+
+435
+00:34:23,840 --> 00:34:28,000
+Map、filter 和 reduce 可能是其中的三个基本概念。
+Map and filter and reduce are probably the three fundamental ones there.
+
+436
+00:34:28,000 --> 00:34:32,320
+但地图的作用其实很简单。它是集合中的函数，
+But what map does, it's really easy. It's a function in a collection like
+
+437
+00:34:32,320 --> 00:34:37,440
+例如数组或范围或类似的东西。它只有一个参数，即函数。
+an Array or Range or something like that. And it has only one argument which is a function.
+
+438
+00:34:37,440 --> 00:34:42,800
+该函数接受数组中的一个元素并返回一些新的东西。
+And that function takes an element in the Array and it returns something new.
+
+439
+00:34:42,800 --> 00:34:45,920
+然后它用新的东西创建一个数组。
+And then it makes an Array out of the something new.
+
+440
+00:34:45,920 --> 00:34:51,440
+因此，它将一个数组转换为另一个数组，从一种类型可能转换为另一种类型，
+So it converts one Array to another Array from one type maybe to another type or
+
+441
+00:34:51,440 --> 00:34:55,840
+或者可能是相同的类型但不同的值。它是一个数组转换器，
+maybe the same type but different values. It’s an Array converter, and it does that
+
+442
+00:34:55,840 --> 00:35:00,080
+它通过对数组中的每个元素一遍又一遍地调用函数来完成转换。
+conversion by calling a function over and over on every single thing in the Array.
+
+443
+00:35:00,960 --> 00:35:04,800
+在此处的第一遍中，我将通过从色钉中的索引映射到匹配来找到所有精确的。
+In the first pass here, I’m going to find all the exact ones by mapping
+
+444
+00:35:04,800 --> 00:35:11,200
+匹配要么是精确匹配，要么是不匹配，因为这只是第一遍。
+from the indices in the pegs to the Match. The Match is either going to be exact or
+
+445
+00:35:11,200 --> 00:35:16,880
+我传递给 map 的函数将采用一个索引（因为我是在索引上执行此操作）
+nomatch because this is only the first pass. The function I pass to map will take an
+
+446
+00:35:16,880 --> 00:35:24,080
+，并且它将返回一个匹配，无论是完全匹配还是不匹配。
+index—because I’m doing it on the indices—and it will return a Match, either exact or nomatch.
+
+447
+00:35:24,080 --> 00:35:34,000
+这里几乎完全相同：我将我的色钉索引颠倒过来，让 exactMatches 等于它，
+It’s almost exactly the same thing here: I take my pegs’ indices, reversed, and I let exactMatches
+
+448
+00:35:34,000 --> 00:35:44,000
+然后我调用 map 并给它一个函数——一个内联函数。
+equal that, then I call map and give it a function here--an inline function .
+
+449
+00:35:44,560 --> 00:35:51,440
+该映射从原始数组中获取一些内容，在本例中是来自色钉索引的索引，
+This map takes something from the original Array, which in this case is an index from peg indices,
+
+450
+00:35:51,440 --> 00:35:59,668
+然后我基本上可以从这里复制代码并将其粘贴到那里，
+and then I can basically copy the code from down here and paste it up there, doing all the
+
+451
+00:35:59,668 --> 00:36:07,600
+做所有相同的事情，除了不将其设置在结果中，我只是从闭包中返回精确值。
+same things except instead of setting this in results, I just return exact from the closure.
+
+452
+00:36:07,600 --> 00:36:14,160
+我必须先这样做，然后返回精确值。注意它抱怨——“嘿，确切地说，那是什么？
+I have to do this first, then return exact. Notice it complains—“hey, .exact, what is
+
+453
+00:36:14,160 --> 00:36:24,560
+”——因为我没有给地图提供足够的信息来知道它要转换成什么。所以我实际上必须在这
+that?”—because I haven’t given enough information for map to know what it’s converting to. So
+
+454
+00:36:24,560 --> 00:36:31,440
+里说 Match.exact，当我这么说时，现在 map 知道该怎么做了。
+I would actually have to say here Match.exact, and when I say that, now map knows what to do.
+
+455
+00:36:31,440 --> 00:36:36,320
+它知道它正在创建一个，因此它能够做到这一点。
+It knows it's creating an , and so it's able to do that.
+
+456
+00:36:36,320 --> 00:36:40,400
+现在，这里还有一件事，它说：“您缺少返回值”。
+Now, another thing here, it says, "You are missing a return value".
+
+457
+00:36:40,400 --> 00:36:46,960
+因为我只在匹配时返回 Match.exact，所以我还必须说如果不匹配，
+Because I only return a Match.exact if it's a match, so I also have to
+
+458
+00:36:46,960 --> 00:36:54,560
+则返回 .nomatch。在这里，我不必说 Match，
+say if it's not a match, return .nomatch. And here, I don't have to say Match, because
+
+459
+00:36:54,560 --> 00:36:59,360
+因为 Swift 已经可以从另一个返回中推断出这就是我们在此映射中构建的内容，所以我只能说，
+Swift can already infer from the other return that that's what we're building here in this map,
+
+460
+00:36:59,360 --> 00:37:05,680
+return .nomatch。所以现在我有了这个 .
+so I can just say, return .nomatch. So now I have, this .nomatch and
+
+461
+00:37:05,680 --> 00:37:10,720
+nomatch 并且我不需要任何这些。
+I don’t need any of this. And this var result right
+
+462
+00:37:10,720 --> 00:37:17,360
+此处的 var 结果以 .nomatch 开头，我们实际上可以将其设为此处的 var 结果。
+here that started out as .nomatch, we could actually make that be var results right here.
+
+463
+00:37:17,360 --> 00:37:24,160
+因此，结果将立即开始，是一个没有匹配且准确的结果。
+And so result is just going to start right off the bat, being an with nomatch and exact.
+
+464
+00:37:24,160 --> 00:37:29,440
+你知道，我也可以让第二部分也有一张地图。
+You know, I could also make this second part down there be a map as well.
+
+465
+00:37:29,440 --> 00:37:33,280
+我们该怎么做呢？这个怎么样？
+How would we do that? How about this?
+
+466
+00:37:33,280 --> 00:37:41,440
+我将返回色钉的索引并映射它们，并带有索引，在这种情况下，
+I going to return the pegs’ indices and map those as well, with index in, and in this case I'm going
+
+467
+00:37:41,440 --> 00:37:48,080
+我将再次在此处使用此代码。让我们看一下这段代码。把这个放在这里。
+to use this code down here again. Let's take this code. Put this up here. And I'm going to change
+
+468
+00:37:48,080 --> 00:37:53,840
+我将在这里再次更改此 var 结果，以精确匹配。因为我实际上不需要 var 结果，
+this var results here, to exactMatches again. Because I actually don't need var results for
+
+469
+00:37:53,840 --> 00:37:57,200
+因为我只是直接返回这个映射。
+this, because I'm just going to return this map directly.
+
+470
+00:37:57,200 --> 00:38:04,240
+所以在这里我要说的是，如果该索引处的 exactMatches 不精确，
+So here I'm going to say, if the exactMatches at that index is not exact, then if it matches
+
+471
+00:38:04,240 --> 00:38:14,240
+那么如果它在这里匹配，那么我将从这个闭包中返回 inexact，并执行删除操作。
+in here, then I'm going to return inexact from this closure, and also do that remove.
+
+472
+00:38:14,240 --> 00:38:19,040
+实际上，让我们结合起来。注意这个。把这个放在这里。逗号。
+And actually, let's combine this. Watch this. Put this here. Comma.
+
+473
+00:38:19,040 --> 00:38:22,400
+之前有人问过这个问题。我们稍后会讨论它。
+Someone was asking about this before. So we'll talk about it in a second.
+
+474
+00:38:22,960 --> 00:38:28,640
+所以我用逗号来梳理它们。当你做 if 时，逗号的意思是“and”。
+So I'm combing those with comma. Comma means "and" when you're doing an if.
+
+475
+00:38:28,640 --> 00:38:35,680
+否则，我将返回该索引处的精确匹配。
+Otherwise, I'm gonna return the exactMatches at that index.
+
+476
+00:38:35,680 --> 00:38:40,720
+这也是，请注意，我不必在这里说 Match.exact，
+This one also, notice I didn't have to say Match.exact here because this alternative one,
+
+477
+00:38:40,720 --> 00:38:44,000
+因为在这个替代方案中，我将返回精确匹配，如果我选择单击它，
+I'm returning exactMatches, which is already known to be--if I option click
+
+478
+00:38:44,000 --> 00:38:50,000
+则已知它是来自此的。所以我不需要这些，
+on it-- from this one. So I don’t need any of this,
+
+479
+00:38:50,000 --> 00:38:55,280
+不需要返回结果。在这里，使用两个映射，
+don't need to return results. Here, with two maps, I've mapped
+
+480
+00:38:55,280 --> 00:39:00,800
+我在第一个映射中映射了精确匹配，然后在第二个映射中，我刚刚返回了另一个从
+the exactMatches in the first one, and then the second one, I've just returned another map that
+
+481
+00:39:00,800 --> 00:39:08,320
+色钉索引映射到精确匹配的映射。但是，这里有一个小问题，
+maps from the pegs’ indices to the exactMatches. But, there's one slight problem here,
+
+482
+00:39:08,320 --> 00:39:15,120
+那就是这个 exactMatches 被颠倒了。所以我们确实在那里正确计算了精确匹配，
+which is that this exactMatches was reversed. So we did calculate the exactMatches properly
+
+483
+00:39:15,120 --> 00:39:20,400
+但它们的顺序相反。如果将这个 exactMatches 的事情反过来，
+there, but they're in reverse order. And having this exactMatches thing be
+
+484
+00:39:20,400 --> 00:39:26,080
+它就不会在这张地图中起作用，因为它使用的是 exactMatches。
+reverse, it makes it so that it doesn't work out here in this map, because it's using exactMatches.
+
+485
+00:39:26,080 --> 00:39:34,240
+所以我们本质上需要将其逆转。所以我们称其为 backwardsExactMatches，
+So we need to reverse it back, essentially. So let's call this backwardsExactMatches,
+
+486
+00:39:34,240 --> 00:39:38,640
+因为这就是它的本质。然后我想说让精确匹配等于向后的匹配。
+because that's what that one is. And then I want to say let exactMatches
+
+487
+00:39:38,640 --> 00:39:46,320
+你可以看到 AI 在这里想说的是相反的。
+equal the backwards one. And you can see AI here wants to say reversed.
+
+488
+00:39:46,320 --> 00:39:50,640
+这正是我想要的，但是当我这样做时，我在这里遇到了错误。
+That is kind of what I want, but I have an error down here when I do that.
+
+489
+00:39:50,640 --> 00:39:54,640
+这个小错误说明了什么？它说，“无法将整个长东西的值”
+What does this little error say? It says, "Cannot convert value"
+
+490
+00:39:54,640 --> 00:39:58,960
+转换为它所谓的“ReversedCollection”。
+of this whole long thing into this thing it calls "ReversedCollection.”
+
+491
+00:39:58,960 --> 00:40:02,240
+您看到该错误中哪里写着 ReversedCollection 了吗？
+You see where it says ReversedCollection there in that error?
+
+492
+00:40:02,240 --> 00:40:06,320
+所以相反，这个小函数与我们这里的相反，它不返回数组。
+So reversed, this little function reversed that we have right here,
+
+493
+00:40:06,320 --> 00:40:08,960
+即使我正在反转数组，它实际上也会返回称为
+it does not return an Array. Even when though I'm reversing
+
+494
+00:40:08,960 --> 00:40:13,200
+ReversedCollection 的东西。
+an Array, it actually returns this thing called a ReversedCollection.
+
+495
+00:40:13,200 --> 00:40:16,960
+现在 ReversedCollection 是一个 Collection，就像 Array 是一个 Collection，
+Now a ReversedCollection is a Collection, just like an Array is a Collection,
+
+496
+00:40:16,960 --> 00:40:22,000
+Set 是一个 Collection，Range 是 Collections，
+a Set is a Collection, Ranges are Collections, so it's a Collection,
+
+497
+00:40:22,000 --> 00:40:27,840
+所以它是一个 Collection，但它不是一个 Array，所以我们不能这样做。我们无法对其进行索引，对吧。
+but it's not an Array, so we can't do this. We can't do the to indexing into it, right.
+
+498
+00:40:27,840 --> 00:40:30,640
+正常的数组，“给我一个数组中的东西”语法。
+The normal Array, "give me a thing in an Array" syntax.
+
+499
+00:40:30,640 --> 00:40:34,240
+所以这必须是一个数组，而且它只是一个集合。
+So this has to be an Array, and it's just a Collection.
+
+500
+00:40:34,240 --> 00:40:39,760
+幸运的是，Array 提供了一个初始化器，
+So luckily, Array has an initializer that you can give it any Collection
+
+501
+00:40:39,760 --> 00:40:42,800
+您可以给它任何 Collection，它会将其转换为 Array。
+and it will turn it into an Array. It goes just goes through the Collection,
+
+502
+00:40:42,800 --> 00:40:46,480
+它只是遍历集合，一一抓取所有内容并将其放入数组中。
+grabs all the things one by one and puts it into an Array.
+
+503
+00:40:46,480 --> 00:40:49,920
+你可能会问“为什么 reverse 不这样做？为什么 reverse 不只返回一个数组？”
+You might ask "why doesn't reversed do that? why doesn't reversed just return an Array?"
+
+504
+00:40:49,920 --> 00:40:52,640
+好吧，想象一下数组很大，你必须反转它。
+Well, imagine the Array was huge and you had to reverse it.
+
+505
+00:40:52,640 --> 00:40:55,360
+你真的要转身创建一个新的数组并复制所有内容吗？
+Are you really gonna turn around and make a new Array with all of them copied?
+
+506
+00:40:55,360 --> 00:41:00,560
+相反，它只是非常聪明地跟踪另一个数组以及它应该向后的事实，
+Instead, it just really smartly keeps track of the other Array and the fact that it's supposed to be
+
+507
+00:41:00,560 --> 00:41:05,040
+然后向后给出它们。因此，当我们将这个数组转换为数组时，
+backwards, and then just gives them out backwards. So when we do this Array of turning it into an
+
+508
+00:41:05,040 --> 00:41:08,320
+我们可能正在复制所有元素。与我们完全无关。
+Array, we probably are copying all the elements. Totally irrelevant to us.
+
+509
+00:41:08,320 --> 00:41:14,080
+我们这里最多只有五六场匹配，所以我们真的不在乎。
+We only have five or six at the most of matches in here, so we really don’t care.
+
+510
+00:41:14,080 --> 00:41:17,360
+但这甚至不是我今天想向您展示的内容（您可以
+But this is not even what I wanted to show you today (and you can go noodle
+
+511
+00:41:17,360 --> 00:41:21,120
+稍后继续讨论并说服自己这可行并尝试理解地图）。
+on that later and convince yourself that this works and try to understand map).
+
+512
+00:41:21,120 --> 00:41:24,720
+但实际上我只是想指出一些非常奇怪的事情。
+But I actually just want to point out something really weird about this.
+
+513
+00:41:24,720 --> 00:41:29,440
+我在地图中内联调用此函数，并查看我在调用的函数内部正在做什么。
+I, in map, am calling this function in-line, and look what I'm doing inside
+
+514
+00:41:29,440 --> 00:41:37,520
+我实际上正在修改这个变量。看到了吗？
+of a function that I'm calling. I'm actually modifying this var. See that? This is a
+
+515
+00:41:37,520 --> 00:41:44,320
+这是匹配中的读/写 var 局部变量，我正在调用的函数内修改它！
+read/write var local variable in match, and I am modifying it inside a function I'm calling!
+
+516
+00:41:44,320 --> 00:41:47,360
+现在，它是一个内联函数，但它仍然是一个函数。
+Now, it's an in-line function, but still it's a function.
+
+517
+00:41:47,360 --> 00:41:51,160
+所以这很奇怪。这让你觉得奇怪吗？
+So that's just weird. Does that strike you as weird or not?
+
+518
+00:41:51,160 --> 00:41:54,320
+不？是的？有些是，有些不是。
+No? Yes? Some yes, some no. But some might say,
+
+519
+00:41:54,320 --> 00:41:58,400
+但有些人可能会说：“哦，这看起来很自然。”这太棒了——太棒了，你认为这是自然的。
+"oh, that seems perfectly natural." Which is great--great that you think it's natural.
+
+520
+00:41:58,400 --> 00:42:02,320
+因为你所说的是“闭包是非常自然的”，事实确实如此。
+Because what you're saying is "closures are very natural," which they are.
+
+521
+00:42:02,320 --> 00:42:08,240
+但奇怪的是，您可以访问该局部变量，
+But it's just weird, that you can access that local variable, and write to it in a function that
+
+522
+00:42:08,240 --> 00:42:12,080
+并将其写入您在此代码中间调用的函数中。
+you're calling right in the middle of this code. But that is an important thing to understand
+
+523
+00:42:12,080 --> 00:42:19,840
+但这对于理解闭包来说是一件很重要的事情。闭包捕获它们正在运行的环境。它们捕获所有局部变量，
+about closures. Closures capture the environment that they are operating in. They capture all the local variables and
+
+524
+00:42:19,840 --> 00:42:23,120
+您可以写入它们。您可能会说，
+you can write to them. The whole word closure,
+
+525
+00:42:23,120 --> 00:42:27,760
+“封闭”一词从何而来？这是因为这是一个封闭的词法作用域，
+you might say, where does that come from? It's because this a closed lexical space
+
+526
+00:42:27,760 --> 00:42:31,760
+包含所有这些内容，这是更技术性的答案。
+that includes all of those things, that's the more technical answer.
+
+527
+00:42:31,760 --> 00:42:37,440
+但是你可以将“闭包”这个词想象成“封闭”这个词，以及这些闭包、
+But you can kind of think of the word "closure" as like the word "enclosed" and these closures,
+
+528
+00:42:37,440 --> 00:42:43,240
+这些内联函数，并且封闭在与它们所在的事物相同的词法环境中。
+these inline functions, and enclosed in the same lexical environment as the thing they're in.
+
+529
+00:42:43,240 --> 00:42:46,240
+这就是为什么您可以访问它们的局部变量。
+And that's why you can access their local variables.
+
+530
+00:42:46,240 --> 00:42:49,840
+这是非常自然的——你能够做到这一点是非常自然的。
+And it is very natural--it's incredibly natural that you're able to do it.
+
+531
+00:42:49,840 --> 00:42:54,080
+但这很酷。当你思考那里实际发生的事情时。您正在调用一个函数，
+But it's pretty cool. When you think about what's actually going on there. You're calling a function, you can actually
+
+532
+00:42:54,080 --> 00:42:59,680
+实际上可以从外部作用域访问局部变量。我现在只是想向您展示这个，
+access local variables from the outer scope. I just wanted to show this to you now,
+
+533
+00:42:59,680 --> 00:43:02,480
+以便您知道它就在那里。随着季度的过去，
+so you know it's there. We'll be doing this as the
+
+534
+00:43:02,480 --> 00:43:08,240
+我们将这样做，但这只是您对函数式编程和闭包的第一次震惊处理，
+quarter goes by, but this is just your first shock treatment on functional programming
+
+535
+00:43:08,240 --> 00:43:12,160
+所以不要太害怕，因为您会说“啊，我没明白。”
+and closures, so don't get too freaked it you're like "Ah, I didn't get that."
+
+536
+00:43:12,160 --> 00:43:22,560
+你可以稍后再看。所以问题是，“var 结果发生了什么？”我们得到了这个 var 结果。
+You can look at it later. So the question is, "What happened to var results?" We had this var results.
+
+537
+00:43:22,560 --> 00:43:26,800
+我们正在向它写入数据。它去哪儿了？
+It was a writable that we were writing to. Where did it go?
+
+538
+00:43:26,800 --> 00:43:33,200
+好吧，它被只读的替换了，看它是一个 let，
+Well, it got replaced by a read-only one, see it's a let, which is the nomatch'es
+
+539
+00:43:33,200 --> 00:43:38,560
+这是不匹配和精确的匹配，而不是不精确的匹配。接下来，
+and the exacts--not the inexact matches. And then the next thing is, we did a map
+
+540
+00:43:38,560 --> 00:43:44,000
+我们再次制作了色钉索引的地图，在其中，我们查看了我们已经在
+of the pegs’ indices again, where inside there, we looked at that exactMatches
+
+541
+00:43:44,000 --> 00:43:49,440
+该闭包内创建的精确匹配。因此，我们再次在第二个闭包中使用局部变量 exactMatches。
+that we already created—inside that closure. So once again we used local variable exactMatches
+
+542
+00:43:49,440 --> 00:43:52,480
+所以在第二个中，我们从色钉映射到匹配结果。
+inside the second closure. So in the second one where
+
+543
+00:43:52,480 --> 00:43:57,680
+在那里，如果它已经准确，我们就将其返回。
+we're mapping from pegs to matches. There, if it's already exact, we just return it.
+
+544
+00:43:57,680 --> 00:44:00,960
+否则，我们会检查它是否不准确，如果不准确，我们会返回它。
+Otherwise, we look to see if it's inexact and if it is, we return that.
+
+545
+00:44:00,960 --> 00:44:03,680
+否则，我们只返回 nomatch，因为两者都不是。
+And otherwise, we just return nomatch because it was neither.
+
+546
+00:44:03,680 --> 00:44:07,840
+如果你往下看底部的一个，看看我们是如何指代那里的精确匹配的。
+If you look down at the bottom one, look how we're referring to exact matches there.
+
+547
+00:44:07,840 --> 00:44:11,040
+所以，我们不需要结果，因为我们正在制作两张地图。
+So, we didn't need the results because we were doing two maps.
+
+548
+00:44:11,040 --> 00:44:17,280
+函数式编程的一大优点是大量只读数据结构。
+And one great thing about functional programming, a lot of read-only data structures.
+
+549
+00:44:17,280 --> 00:44:20,880
+我们不需要那么多的 var 结果来积累东西。
+We don't need as many var results accumulating things.
+
+550
+00:44:20,880 --> 00:44:24,880
+我们有这些很好的只读数据结构，它们从函数返回并传递给函数和类似的东西。
+We have these nice read-only data structures that are being returned from functions and
+
+551
+00:44:24,880 --> 00:44:30,480
+第二个问题，我们想将 ForEach 存储回结果，
+passed to functions and stuff like that. And the second question, we wanted to store
+
+552
+00:44:30,480 --> 00:44:35,680
+但现在感觉我们只返回一个标签。
+ForEach back what was the result, but right now it feels like we're only returning one tag.
+
+553
+00:44:35,680 --> 00:44:39,840
+是的。所以问题基本上是我们的 for 循环在哪里。看起来我们只是在批处理或
+Yeah. So the question is where's our for loop, basically. It seems like we're just doing this
+
+554
+00:44:39,840 --> 00:44:42,960
+其他操作中执行此操作，而不是执行 for 循环。
+in batch processing or something instead of doing a for loop.
+
+555
+00:44:42,960 --> 00:44:45,680
+答案是 for 循环位于 map 函数内部，
+And the answer is the for loop is inside the map function,
+
+556
+00:44:45,680 --> 00:44:51,120
+因为 for 循环中的 map 函数对所有内容重复调用其参数。
+because the map function in a for loop calls its argument right there repeatedly on everything.
+
+557
+00:44:51,120 --> 00:44:54,000
+它对它们进行 for 循环。所以它是内置的。
+It does a for loop over them. So it's built-in.
+
+558
+00:44:54,800 --> 00:44:59,840
+我想我在这里大约有三分钟的时间，然后我必须回去谈论数据流。
+I think I have about three minutes here before I have to go back and talk about data flow.
+
+559
+00:44:59,840 --> 00:45:08,880
+那么我要做哪些事情呢？让我们快速做一个命名的事情。
+So which of these things am I going to do? Let's do a quick one which is a naming thing.
+
+560
+00:45:08,880 --> 00:45:15,600
+所以我做了一个我不喜欢的命名事情，所以我要回到它，那就是这里。
+So I did a naming thing that I didn't like and so I'm going to go back to it and that is right here.
+
+561
+00:45:15,600 --> 00:45:21,920
+你看到这个了吗？我将代码中缺失的 Peg 称为“缺失”。
+You see this? I called a missing Peg "missing" inside of Code.
+
+562
+00:45:21,920 --> 00:45:29,600
+但看看它在我的代码中是如何读取的。代码缺失。看起来这是一个缺失的代码，而不是一个缺失的色钉。
+But look how it reads in my code. Code.missing. That looks like it's a missing code, not a missing peg.
+
+563
+00:45:29,600 --> 00:45:32,960
+所以我真的认为我应该把这个东西称为“失踪的色钉”。
+So I really think I should have called this thing missing peg.
+
+564
+00:45:32,960 --> 00:45:36,640
+所以我要重构，哎呀，而不是提取文件。
+So I'm going to refactor and oops, not extract file.
+
+565
+00:45:36,640 --> 00:45:45,840
+我将重构并重命名它，并在找到它的所有情况后将其称为“missingPeg”
+I'm going to refactor and rename this and call it after it finds all the cases of
+
+566
+00:45:45,840 --> 00:45:54,720
+。代码.missingPeg。我可以做的另一件事实际上是向 Color 添加一个扩展，将其添加到那里。
+it "missingPeg". Code.missingPeg. Another thing I could have done is actually added an extension to Color that added it there.
+
+567
+00:45:54,720 --> 00:46:07,520
+注意这个。扩展颜色，让缺失：Color.clear，= Color.clear。那里必须是平等的。
+Watch this. extension Color, let missing: Color.clear, = Color.clear. It needs to be equal there.
+
+568
+00:46:07,520 --> 00:46:15,680
+等于。现在我实际上可以称之为 Peg.missing，而不是 Code.missingPeg。所以这是一个缺失的 Peg。
+Equals. And now I could actually call this, instead of Code.missingPeg, Peg.missing. So it's a missing Peg.
+
+569
+00:46:15,680 --> 00:46:21,440
+当然，Peg 是 Color 的类型别名。所以我什至可以说“扩展钉”
+And Peg of course is typealias to Color. So I could even say "extension Peg",
+
+570
+00:46:21,440 --> 00:46:27,680
+，因为它与类型别名是一样的。是的，抱歉，它是静态的。
+because it's the same thing, as typealias. Yes, sorry it's static.
+
+571
+00:46:27,680 --> 00:46:30,800
+静止的。静态 let 就像我在代码上的静态 let 一样。
+Static. A static let just like my static let on Code.
+
+572
+00:46:30,800 --> 00:46:34,880
+所以我也可以这么做。我想那也很好。
+So I could have done that as well. I think that would have been good too.
+
+573
+00:46:34,880 --> 00:46:39,520
+所以，现在有点不合时宜了，但是你明白我在这里所说的命名是什么吗？
+So, kind of out of time to go change it to that, but you see what I'm talking about naming here?
+
+574
+00:46:39,520 --> 00:46:43,280
+命名很重要，我真的希望你们真正考虑命名，而不仅仅是在这堂课上。
+Naming matters and I really want you to really think about naming not just in this class.
+
+575
+00:46:43,280 --> 00:46:46,640
+在你的整个计算机科学职业生涯中，选择好名字。
+In your entire computer science career pick good names.
+
+576
+00:46:48,640 --> 00:46:54,560
+回到我们的幻灯片。因此，
+Back to our slides. So data flow is crucial to building
+
+577
+00:46:54,560 --> 00:46:59,840
+数据流对于构建可靠且可调试的应用程序至关重要，并且您可以弄清楚它们是如何工作的等等。
+apps that are reliable and debuggable and that you can figure out how they work and all that.
+
+578
+00:46:59,840 --> 00:47:05,200
+因此，让我们讨论一下在您的应用程序中通过所有视图流动的数据类型。
+So let's talk about the kind of data that flows throughout your app through all your Views.
+
+579
+00:47:05,200 --> 00:47:11,360
+因此，一种数据流是数据仅流入视图并且在那里只读。
+So one kind of data flow is data flows into a View just only in and it's read only in there.
+
+580
+00:47:11,360 --> 00:47:16,240
+好的。 视图明白了。这就像 MatchMarkers 获取匹配结果一样。
+Okay. View gets it. This is like MatchMarkers takes the matches.
+
+581
+00:47:16,240 --> 00:47:22,320
+好的。这是如何声明的？让匹配： .它是无与伦比的。
+Okay. And how is that declared? let matches: . And it has no equals.
+
+582
+00:47:22,320 --> 00:47:25,360
+所以当有人创建 MatchMarkers 时必须传入它。
+So it has to be passed in when someone creates a MatchMarkers.
+
+583
+00:47:25,360 --> 00:47:31,360
+这是数据。大家明白吗？好的。然后是我拥有的数据。
+That's data in. Everybody understand that? Okay. Then there's data owned by me.
+
+584
+00:47:31,360 --> 00:47:36,400
+我拥有这些数据的真实来源。就像 @State 一样。
+That's data for which I own the source of truth. That's like @State.
+
+585
+00:47:36,960 --> 00:47:42,240
+@State 游戏等于 CodeBreaker。好的。该视图拥有游戏。好的。
+@State game equals CodeBreaker. Okay. That View owns the game. All right.
+
+586
+00:47:42,240 --> 00:47:45,760
+所以我们要讨论一下这个问题。然后是数据 IO。
+So we're going to talk a little bit about that. Then there's Data IO.
+
+587
+00:47:45,760 --> 00:47:52,240
+这是与您的视图共享的数据。因此，您可以获得这些数据并且可以对其进行修改，
+This is data that is shared with your View. So this data you get it and you can
+
+588
+00:47:52,240 --> 00:47:55,760
+但您并不拥有它。你不是真理的来源。
+modify it but you don't own it. You are not the source of truth.
+
+589
+00:47:55,760 --> 00:47:57,600
+其他人是真理的来源。好的？
+Somebody else is the source of truth. Okay?
+
+590
+00:47:57,600 --> 00:48:00,800
+正在与您分享。所以我们将讨论它是如何运作的。
+It's being shared with you. So we're going to talk about how that works.
+
+591
+00:48:00,800 --> 00:48:04,720
+在我们迄今为止所做的事情中，我们根本没有看到这一点。
+We have not seen that at all in what we've done so far.
+
+592
+00:48:04,720 --> 00:48:09,120
+这就是函数式编程。所以有时候我们通过调用函数来传入和传出数据。
+And then this is functional programming. So sometimes we pass data in and out by
+
+593
+00:48:09,120 --> 00:48:16,240
+好的。我们通过让我们的视图中的类型是函数来实现这一点。
+calling functions. Okay. And this we do this by having lets in our Views whose type is a function.
+
+594
+00:48:16,240 --> 00:48:19,840
+返回一些数据的函数，或者向其传递一些数据的函数，
+A function that returns some data, or a function that you pass some data to,
+
+595
+00:48:19,840 --> 00:48:24,480
+然后视图可以调用该函数来立即获取数据，或者一次返回一些数据。
+and then the View can call that function to get the data at once, or return some data that once.
+
+596
+00:48:24,480 --> 00:48:26,880
+你明白我在说什么，你也确实看到了这一点。
+You see what I'm saying and you have actually seen this.
+
+597
+00:48:26,880 --> 00:48:34,640
+谁能告诉我一些我们见过的使用函数将数据传递到视图的东西？
+Can anyone tell me something that we've seen that uses a function to pass data to a View?
+
+598
+00:48:34,640 --> 00:48:39,280
+@ViewBuilders。是的，完全正确。@ViewBuilders 喜欢 VStack。
+@ViewBuilders. Yeah, exactly. @ViewBuilders like VStack. the third argument to VStack
+
+599
+00:48:39,280 --> 00:48:43,360
+VStack 的第三个参数或 ForEach 的第三个参数。
+or the third argument to ForEach. That's a function and you know
+
+600
+00:48:43,360 --> 00:48:47,840
+这是一个函数，你知道 ForEach 或 VStack 调用它来获取视图，
+ForEach or VStack calls it to get the View it you know the bag of Lego that it
+
+601
+00:48:47,840 --> 00:48:52,000
+你知道它想要的乐高包，顺便问一下为什么它要这样做？因为它希望 @ViewBuilder 工作，
+wants and why does it do that by the way? Because it wants @ViewBuilder to work and
+
+602
+00:48:52,000 --> 00:48:56,960
+而 @ViewBuilder 仅适用于函数，所以这就是该参数是函数的原因。
+@ViewBuilder only works on functions so that's why that argument is a function.
+
+603
+00:48:56,960 --> 00:49:01,600
+所以你在函数 data out 中有数据，然后我只是提到这一点，
+So you have data in functions data out, and then I'm just mentioning this it's not really data flow
+
+604
+00:49:01,600 --> 00:49:05,920
+它本身并不是真正的数据流，但当然有时你的视图有一个动作函数——当你的视图内部发生某些事情时，
+per se, but of course sometimes your View has an action func--a func that just gets called
+
+605
+00:49:05,920 --> 00:49:11,120
+这个函数就会被调用。好的，更新这个或类似的东西。
+when something happens inside your View. Okay, update this or something like that.
+
+606
+00:49:11,120 --> 00:49:17,920
+因此，有时您会遇到操作函数通常不带参数且不返回任何内容的情况，例如 Button 有其中之一，
+So sometimes you had that action functions often take no arguments and return nothing like Button
+
+607
+00:49:17,920 --> 00:49:20,800
+对吧？Button 有一个操作。
+has one of these, right? Button has an action.
+
+608
+00:49:20,800 --> 00:49:22,960
+这就是当你点击 Button 时它所做的事情，对吗？
+That's the thing that the Button does when you click on it, right?
+
+609
+00:49:22,960 --> 00:49:28,480
+所以其他视图也可能有这种行为。现在，如果可以的话，
+So other Views could have that kind of behavior. Now I would like to install a discipline in
+
+610
+00:49:28,480 --> 00:49:31,440
+我想在课堂上建立一个纪律。
+the class if we could. And this is new for me,
+
+611
+00:49:31,440 --> 00:49:35,120
+这对我来说也是新的，我可能会一遍又一遍地忘记这样做，
+too, and I'm probably going to forget to do it over and over, but hopefully
+
+612
+00:49:35,120 --> 00:49:39,200
+但希望你会记得在作业中这样做。但原则是将我们所有的数据流
+you'll remember to do it in your homework. But the discipline is to just put all of our
+
+613
+00:49:39,200 --> 00:49:43,120
+事物放在我们视图的顶部。好的？
+data flow things at the top of our View. Okay?
+
+614
+00:49:43,120 --> 00:49:50,400
+我们共享数据中的所有数据，我们的 @State，它们都位于顶部，
+All our data in our shared data, our @State's, all of them at the top instead of spreading
+
+615
+00:49:50,400 --> 00:49:53,520
+而不是分散在下面，这是合法的，但我们只是将它们全部放在顶部。
+them out below, which is legal, but we're just going to put them all at the top.
+
+616
+00:49:53,520 --> 00:49:59,200
+我们将添加注释，这些 \\ MARK 注释，我将在周三的演示中向您展示 MARK 的作用。
+And we're going to put comments, these \\ MARK comments, which I'll show you in the demo on
+
+617
+00:49:59,200 --> 00:50:03,680
+放一点\\ MARKS：数据 IO。
+Wednesday what that MARK thing does. Put a little \\ MARKS: Data IO.
+
+618
+00:50:03,680 --> 00:50:07,680
+这是数据 IO 部分。这是节中的数据。
+This is a Data IO section. And this is the data in section.
+
+619
+00:50:07,680 --> 00:50:09,680
+这是数据输出功能。我们只是要标记它们。
+This is the Data Out Function. We're just going to mark them.
+
+620
+00:50:09,680 --> 00:50:12,240
+你明白我的意思吗？只是为了让我们认识到。
+You see what I mean? Just so that we are cognizant.
+
+621
+00:50:12,240 --> 00:50:16,080
+哦，是的，我在这里做数据。我正在做数据 IO 等。
+Oh yes, I'm doing Data In here. I'm doing Data IO, etc.
+
+622
+00:50:16,640 --> 00:50:21,360
+在这样的注释中输入一些多余的代码，
+It's going to be a little excess code typing in comments like this,
+
+623
+00:50:21,360 --> 00:50:24,400
+但我认为纪律可能会有所帮助。所以，我们将在本季度尝试一下，然后看看结果。
+but I think the discipline might help. So, we'll try it this quarter and we'll see.
+
+624
+00:50:24,400 --> 00:50:27,440
+在此之前我从未明确地这样做过，但我们会看看它是如何进行的。
+I've never done it before this explicitly, but we'll see how it goes.
+
+625
+00:50:27,440 --> 00:50:31,440
+如果我在演讲而没有这样做，你可以提醒我，嘿，在那里发表评论怎么样？
+And if I'm in lecture and I'm not doing it, you can remind me, hey, how about a comment there?
+
+626
+00:50:31,440 --> 00:50:33,760
+好的。我们将看看我们是否能够共同做到这一点。
+Okay. And we'll see if together we can do it.
+
+627
+00:50:33,760 --> 00:50:36,960
+但是，请继续在你的作业三中尝试一下吧。
+But go ahead and try this in your assignment three, let's say.
+
+628
+00:50:36,960 --> 00:50:39,200
+在作业中开始它。不要担心作业二，
+Start it in assignment . Don't worry about for assignment two or
+
+629
+00:50:39,200 --> 00:50:43,920
+或者如果你愿意的话可以在作业二中完成。但无论如何。好的。那么我们来谈谈这些事情吧。
+do it in assignment two if you want to. But anyway. All right. So let's talk about these things.
+
+630
+00:50:43,920 --> 00:50:49,680
+数据输入，正如我所说，这主要就像让 matches 是一个，然后将其传入。
+Data In, as I said it's mostly like let matches is an and you pass it in.
+
+631
+00:50:49,680 --> 00:50:55,760
+当然我们知道它也可能是 var 匹配。等于几乎相同的东西，
+Of course we know it also could be var matches. equals something which is almost the same,
+
+632
+00:50:55,760 --> 00:51:03,880
+除了现在有一个默认值。所以有人可能会说我不想提供那个变量。正确的？
+except for there's a default value now. And so someone could say I don't want to provide that var. Right?
+
+633
+00:51:03,880 --> 00:51:06,800
+每个人都理解在视图顶部使用 let 和使用默认值的 var 之间的区别吗？
+Does everyone understand the difference between having a let, and then having a var with a default
+
+634
+00:51:06,800 --> 00:51:13,200
+是的。所以我没有看到很多人点头。不。
+value at the top of your View? Yeah. So I don't see a lot of nodding heads. No.
+
+635
+00:51:13,200 --> 00:51:14,880
+好的。好吧，也许我们会在周三展示这一点。
+Okay. Well, maybe we'll show that on Wednesday.
+
+636
+00:51:14,880 --> 00:51:19,600
+但我的意思是你们都明白，在您的视图顶部，让意味着必须有人将其传递给我。
+But I mean you all understand that let, at the top of your View, means someone has to
+
+637
+00:51:19,600 --> 00:51:21,200
+好的。
+pass this to me. Okay.
+
+638
+00:51:21,200 --> 00:51:26,080
+好吧，var 也意味着除了 var 之外，它也可以有一个初始值，对吗？
+Well, var means that too, except for a var, it could have an initial value, right?
+
+639
+00:51:26,080 --> 00:51:29,360
+那将是默认的。这就是我要说的。
+That would be a default. That's that's all I'm saying there.
+
+640
+00:51:30,640 --> 00:51:34,720
+当然，如果您的视图中有 init。我们还没有使用 init 获得任何视图。
+Of course, if you have an init in your View. We haven't had any Views with init.
+
+641
+00:51:34,720 --> 00:51:39,200
+我们的模型有一个初始化，但没有我们的视图。但是视图可以有 init，
+We had our Model have an init but not our Views. But Views can have init and you could pass data
+
+642
+00:51:39,200 --> 00:51:44,400
+你可以通过 init 的参数传递数据，显然是初始化你的视图。
+in through the arguments of an init, obviously initializing your View.
+
+643
+00:51:44,400 --> 00:51:48,240
+但是，您的视图中还包含另一种数据（我们在这里讨论）
+But there's another kind of data that comes in to your View--we're talking about
+
+644
+00:51:48,240 --> 00:51:53,680
+，即“环境值”。关于您的环境的价值观。
+here--which is "environment values". Values about your environment.
+
+645
+00:51:53,680 --> 00:51:58,880
+所以有时你的视图，为了正确绘制，可能需要知道它所处的环境。
+So sometimes your View, to draw properly, might need to know what environment it's in.
+
+646
+00:51:58,880 --> 00:52:02,560
+举一些例子……我是处于深色模式还是浅色模式？
+So some examples ... Am I in dark mode or am I in light mode?
+
+647
+00:52:02,560 --> 00:52:08,560
+辅助功能：针对视障人士或其他类型事物的设置。
+Accessibility: settings for visually impaired or other kinds of things.
+
+648
+00:52:08,560 --> 00:52:14,320
+我现在是否是活跃的应用程序？我必须绘制多少水平和垂直空间？
+Am I the active application right now or not? How much horizontal and vertical
+
+649
+00:52:14,320 --> 00:52:18,960
+我处于竖屏还是横屏？
+space do I have to draw? Am I in portrait mode or am I in landscape mode?
+
+650
+00:52:18,960 --> 00:52:23,040
+我在什么地区？我的用户是世界的哪个部分？
+What locale am I in? What part of the world is my user?
+
+651
+00:52:23,040 --> 00:52:27,040
+有一个叫做 UndoManager 的东西，用于管理应用程序中的撤消操作。
+There's a thing called an UndoManager for managing undo in your app.
+
+652
+00:52:27,040 --> 00:52:34,000
+像字体、minimumScaleFactor、dynamicTypeSize 和
+Things like font, and minimumScaleFactor and dynamicTypeSize and lineSpacing, things like
+
+653
+00:52:34,000 --> 00:52:38,400
+lineSpacing 之类的东西，就像您使用这些视图修饰器设置的那样。它们也是您环境的一部分，对吧？
+that that you set with these View modifiers. They're part of your environment as well, right?
+
+654
+00:52:38,400 --> 00:52:42,000
+因为记得我在 Button 上设置了 80 点的字体。
+Because remember I set a font of 80 point on a Button.
+
+655
+00:52:42,000 --> 00:52:46,400
+它知道将其传递给 Text。那是因为那是其环境的一部分。
+It knew to pass that along to its Text. That's because that was part of its environment.
+
+656
+00:52:46,400 --> 00:52:49,520
+它是 Button 环境的一部分。因此它成为 Text 环境的一部分。
+It was part of the Button's environment. So it became part of the Text's' environment.
+
+657
+00:52:49,520 --> 00:52:54,480
+因此，您想了解的这些环境事物都存在于一个名为“
+So these environmental things you want to know, they all live, all of them,
+
+658
+00:52:54,480 --> 00:53:01,760
+EnvironmentValues”的结构中。因此，请尽快查看文档，
+in a single struct called EnvironmentValues. So go to the documentation as soon as possible,
+
+659
+00:53:01,760 --> 00:53:07,440
+然后查看 EnvironmentValues，您将在其中看到一长串变量，以及所有这些变量的解释，
+and go look at EnvironmentValues, and you will see a big long list of vars in there, and explanation
+
+660
+00:53:07,440 --> 00:53:12,400
+您将看到用于深色和浅色模式的 colorScheme 以及所有这些内容。
+of all of them and you'll see colorScheme for dark and light mode and all these things in there.
+
+661
+00:53:12,400 --> 00:53:16,400
+但有趣的是我们不直接访问 EnvironmentValues。
+But the interesting thing is we do not access EnvironmentValues directly.
+
+662
+00:53:16,400 --> 00:53:20,400
+我们不会自己创建 EnvironmentValues 实例，再直接从中读取值。
+You don't like create one of these structs and get its values or anything or get one of these.
+
+663
+00:53:20,400 --> 00:53:27,040
+相反，我们通过 @Environment 属性包装器访问环境值。
+Instead, we access it with this @ thing called @Environment. Okay? And
+
+664
+00:53:27,040 --> 00:53:31,120
+@Environment 接收一个参数，
+@Environment takes one little argument there, which is the name of the var in
+
+665
+00:53:31,120 --> 00:53:36,800
+它是您感兴趣的 EnvironmentValues 中的 var 的名称。
+EnvironmentValues that you're interested in. And then you give a local name to it,
+
+666
+00:53:36,800 --> 00:53:40,800
+然后您为其指定一个本地名称，基本上是在视图中使用的变量名称，通常是相同的名称。
+basically a variable name to use inside your View, which is usually the same name.
+
+667
+00:53:40,800 --> 00:53:43,120
+不一定是，但通常是同一个名字。
+Doesn't have to be, but it's usually the same name.
+
+668
+00:53:43,120 --> 00:53:47,840
+然后在视图中，您现在可以看到颜色方案、深色和浅色模式。
+And then inside your View, you can now see the colorScheme, the dark and light mode.
+
+669
+00:53:47,840 --> 00:53:52,720
+colorScheme 是视图运行环境的深色模式与亮模式。
+colorScheme is dark versus light mode of the environment your View is running in.
+
+670
+00:53:52,720 --> 00:53:56,880
+例如，我可以让 body 绘制一个月亮，
+Okay? So I might have my var body to draw a moon,
+
+671
+00:53:56,880 --> 00:54:02,400
+如果我处于黑深色模式，它是一个黄色的月亮。如果我处于浅色模式，那就是蓝色的月亮。
+and if I'm in dark mode, it's a yellow moon. And if I'm in light mode, it's a blue moon.
+
+672
+00:54:02,400 --> 00:54:08,320
+好的？我只需查看我的 colorScheme 就可以做到这一点，对吧？所以有很多事情。
+Okay? And I can do that by just looking at my colorScheme, right? And so there's tons of things.
+
+673
+00:54:08,320 --> 00:54:11,440
+我在上一件事中提到了其中的一些，
+I mentioned a bunch of them on the previous thing, but there's probably close to a
+
+674
+00:54:11,440 --> 00:54:16,720
+但您的环境中可能有近一百种不同的事物。令人惊奇的是，
+hundred different things in your environment. And you can add your own EnvironmentValues,
+
+675
+00:54:16,720 --> 00:54:20,240
+您可以添加自己的环境值，您想要在视图环境中添加的东西。
+amazingly, things that you want to be in the environment of a View.
+
+676
+00:54:20,240 --> 00:54:26,720
+可以通过扩展 EnvironmentValues 来实现；这里还可以使用 @Entry。
+You do that with an extension to EnvironmentValues, obviously. And there's this nice little @ thing called @Entry.
+
+677
+00:54:26,720 --> 00:54:31,520
+您只需说出 var 的名称，例如 var Words 或 var colorScheme。
+And you just say the name of the var, like var words or var colorScheme.
+
+678
+00:54:31,520 --> 00:54:34,800
+但你必须给出一个默认值，因为当人们查看你的环境时，
+But you have to give a default value, because when people look in your environment,
+
+679
+00:54:34,800 --> 00:54:40,640
+他们必须至少看到一个默认值。但这个值也是可以设置的。
+they have to see at least a default value. But this value also can be set though.
+
+680
+00:54:40,640 --> 00:54:43,040
+顺便说一句，你很少会这样做。这堂课你不会这么做。
+By the way you're rarely going to do this. You won't do it in this class.
+
+681
+00:54:43,040 --> 00:54:47,520
+我只是想让你知道这是可以做到的，但你不需要这样做。
+I just want you let you know it can be done, but you don't need to do it.
+
+682
+00:54:48,080 --> 00:54:50,800
+那么这些值是如何设置的呢？当然，其中很多，例如 colorScheme，
+So how do these values get set? Well of course a lot of them,
+
+683
+00:54:50,800 --> 00:54:54,800
+都是由 SwiftUI 设置的。它知道 colorScheme 是什么，
+like colorScheme, are being set by SwiftUI. It knows what the colorScheme and it just
+
+684
+00:54:54,800 --> 00:55:03,600
+并且只是将其设置在您的环境中。但您可以使用 .environment 视图修饰器覆盖它。所以 .environment 有两个参数。
+sets it in your environment. But you can override that with the .environment View modifier. So .environment takes two arguments.
+
+685
+00:55:03,600 --> 00:55:06,640
+第一个是 var 的名称，例如 colorScheme 或其他名称。
+The first one is the name of the var, like colorScheme or whatever.
+
+686
+00:55:06,640 --> 00:55:09,520
+第二个是你想要它实现的值。
+And then the second one is the value that you want it to do.
+
+687
+00:55:09,520 --> 00:55:18,080
+因此，如果我执行此 MatchMarkers.environment，MatchMarkers 会认为它处于黑深色模式。
+So if I did this MatchMarkers.environment, MatchMarkers would think it's in dark mode. No matter what the phone actually was,
+
+688
+00:55:18,080 --> 00:55:21,120
+无论手机实际上是什么，它都会认为它处于黑深色模式，因为我改变了它的环境。
+it would think it's in dark mode because I changed its environment.
+
+689
+00:55:21,120 --> 00:55:28,640
+你看？因此环境是特定于视图的。每个视图都有自己的环境，您可以调整其环境。
+You see? And so environments are View specific. Each View has its own environment and you can tweak its environment.
+
+690
+00:55:28,640 --> 00:55:33,440
+再说一遍，这就是为什么“Guess”按钮，当我说80 点系统字体的.font 时，
+And again, that’s why with the guess Button, when I said .font with 80-point system font,
+
+691
+00:55:33,440 --> 00:55:38,640
+它成为 Button 环境的一部分。好的？没有其他视图，只有 Button。
+that became part of the environment of the Button. Okay? No other Views, just the Button.
+
+692
+00:55:38,640 --> 00:55:41,760
+由于它是环境，或者是 Button 的一部分，
+And since it was environment, or part of the Button, that environment
+
+693
+00:55:41,760 --> 00:55:47,520
+因此该环境会传递到所有子视图。因此，
+passes down to all the subviews. So your environment works for you
+
+694
+00:55:47,520 --> 00:55:49,920
+您的环境适合您和您的所有子视图。
+and all your subviews. All the things in your
+
+695
+00:55:49,920 --> 00:55:54,000
+body 中的所有子视图都会继承这个环境。这是一个非常实用的特性，
+var body get this environment. This is a really cool feature—the way
+
+696
+00:55:54,000 --> 00:56:03,040
+您可以通过这种方式让环境数据在视图中流动。好的。好的。
+you can kind of have this environmental data flowing down through the Views. Okay. All right.
+
+697
+00:56:03,040 --> 00:56:07,120
+我们很少调用 .environment，但我们将在本课程中调用它几次。
+We don’t call .environment very much, but we are going to call it a couple of times in this class.
+
+698
+00:56:07,120 --> 00:56:10,480
+你会看到我们在哪里使用它。好吧，让我们进入下一个。
+You’ll see where we use it. All right, let’s go to the next, though.
+
+699
+00:56:10,480 --> 00:56:12,240
+这就是数据输入。这就是数据进来的方式：
+That’s Data In. That’s how data comes in:
+
+700
+00:56:12,240 --> 00:56:17,920
+要么作为 let、var 或 init 参数，要么作为环境数据进来。
+either as a let or a var or an init argument, or as environment data coming in.
+
+701
+00:56:19,280 --> 00:56:22,240
+然后是视图拥有的数据。这是 @State。
+Then there’s data that’s owned by the View. This is @State.
+
+702
+00:56:22,240 --> 00:56:26,720
+你很清楚这一点，这是有道理的。我想强调的一件事是：
+You know this well, it makes sense. One thing I do want to emphasize:
+
+703
+00:56:26,720 --> 00:56:32,240
+我们通常不会像我们现在所做的那样使用 @State 来保存我们的模型。
+we do not generally use @State to hold our Model like we’re doing.
+
+704
+00:56:32,240 --> 00:56:37,120
+我们这样做是因为我们理解得太早，无法以其他方式做到这一点。
+We’re doing that because we were too early in our understanding to do it any other way.
+
+705
+00:56:37,120 --> 00:56:41,680
+但一般来说，我们的模型是给我们的。
+But generally what happens with our Model is it is given to us.
+
+706
+00:56:41,680 --> 00:56:48,400
+因此，如果您有一个 CodeBreakerView，它几乎总是会有一个 let，即要显示的模型、
+So if you have a CodeBreakerView, it’s almost always going to have a let, which is the Model,
+
+707
+00:56:48,400 --> 00:56:50,800
+CodeBreaker。你明白我在说什么吗？
+the CodeBreaker, to show. You see what I’m saying?
+
+708
+00:56:50,800 --> 00:56:56,400
+CodeBreakerView 是一种在视觉上体现 CodeBreaker 的东西，
+A CodeBreakerView is a thing that visually manifests a CodeBreaker, and so usually it’s
+
+709
+00:56:56,400 --> 00:57:01,520
+因此通常是有人将它交给您并说：“请为我在视觉上体现这一点。”正确的？
+a thing where someone gives it to you and says, “Please visually manifest this for me.” Right?
+
+710
+00:57:01,520 --> 00:57:08,560
+像 @State 这样将其存储在视图中的情况很少见（这并不正常），
+It’s rare—it’s not normal—to have it stored inside the View like this in @State, which you
+
+711
+00:57:08,560 --> 00:57:13,600
+您可以理解这一点，因为一旦视图离开屏幕，@State 就会被扔进垃圾桶。
+can kind of understand because @State gets thrown in the trash as soon as the View goes off screen.
+
+712
+00:57:13,600 --> 00:57:17,520
+因此，想象一下您有一个更复杂的应用程序，可以让您同时玩多个
+So imagine you had a more sophisticated app that let you play multiple games of CodeBreaker at
+
+713
+00:57:17,520 --> 00:57:22,000
+CodeBreaker 游戏并在它们之间进行切换 - 好吧，在我们的系统中，每次您切换到另一个游戏时，
+the same time and switch between them—well, with our system, every time you switch to another one,
+
+714
+00:57:22,000 --> 00:57:24,880
+最后一个游戏都会被丢弃，因为视图会离开屏幕。
+the last one would get thrown away because that View would go off screen.
+
+715
+00:57:24,880 --> 00:57:27,920
+卡轰——消失了。所以这不好，对吧？
+Kaboom—it’s gone. So that’s no good, right?
+
+716
+00:57:27,920 --> 00:57:32,800
+您可能希望这些游戏存储在更高级别的存储空间中，我们将在几周内完成此操作，
+You would want those games stored at a higher level where some storage is, and we’re going
+
+717
+00:57:32,800 --> 00:57:37,200
+然后询问 CodeBreakerView，“请为我绘制这个 CodeBreaker。
+to do this in a couple weeks, and then ask the CodeBreakerView, “Please draw this CodeBreaker
+
+718
+00:57:37,200 --> 00:57:42,480
+”所以我只是不想让你明白你做模型的方式是将它放在 @State 中。
+for me.” So I just don’t want you to get the idea that the way you do Model is put it in @State.
+
+719
+00:57:42,480 --> 00:57:46,000
+这是一个演示。我们很快就会摆脱它。
+It’s a demo. We’re going to get rid of that soon.
+
+720
+00:57:46,000 --> 00:57:49,520
+那么，如果你的模型不在那里，那么 @State 有什么用呢？
+So what is @State used for then, if your Model’s not in there?
+
+721
+00:57:49,520 --> 00:57:53,440
+嗯，它用于 UI 内容，例如“当前选择是什么？”
+Well, it’s used for UI things like “What’s the current selection?” or
+
+722
+00:57:53,440 --> 00:57:57,200
+或“我应该如何排序？”？如果我在排序方法之间进行选择，
+“How am I supposed to be sorting this?”? If I’m choosing between sorting methods,
+
+723
+00:57:57,200 --> 00:58:03,040
+或者输入搜索数据的搜索字符串，或者表示是否应该出现警报的布尔值，
+or a search String I type in to search through my data, or a boolean that says whether
+
+724
+00:58:03,040 --> 00:58:06,880
+或者与配置 UI 相关的其他内容，那么当您实际与视图交互时，
+an alert should come up, or other things that have to do with just configuring the
+
+725
+00:58:06,880 --> 00:58:12,320
+这些临时内容只是 @State，因为 @State 是视图状态，
+UI—temporary things that are only @State when you’re actually interacting with a View, because
+
+726
+00:58:12,880 --> 00:58:18,240
+而视图是临时的。他们出现在屏幕上，做一些事情，然后离开，
+@State is View state, and Views are temporary. They come on screen, they do some things,
+
+727
+00:58:18,240 --> 00:58:23,520
+对吗？他们出现在屏幕上，做一些事情，然后离开。这就是视图的工作方式。
+they go away, right? They come on screen, they do some things, they go away. That’s the way Views work.
+
+728
+00:58:23,520 --> 00:58:27,520
+我们有一个简单的应用程序，其中会出现一个视图，并且在应用程序的整个生命周期中始终会出现，
+We have a simple app where a View comes up and it’s up all the time for the entire lifetime of
+
+729
+00:58:27,520 --> 00:58:31,680
+因为这是我们唯一简单的小视图。但到目前为止，我们的视图是一个非常简单的视图，
+the app, because it’s our only simple little View. But ours is a very simple View so far,
+
+730
+00:58:31,680 --> 00:58:36,640
+不用担心，CodeBreaker 将成为一个非常强大的应用程序，
+and we will, don’t worry—, CodeBreaker is going to be a really powerful app with multiple Views and
+
+731
+00:58:36,640 --> 00:58:42,480
+具有多个视图和表单以及各种各样的东西。但现在它处于简单模式。
+Forms and all kinds of stuff going on. But right now it’s in simple mode.
+
+732
+00:58:42,480 --> 00:58:48,320
+注意：我只是想强调私有的 @State。我之前告诉过你：
+Note: I just want to emphasize the private @State. I told you this before: always put
+
+733
+00:58:48,320 --> 00:58:51,920
+始终将 @State 设为私有。总是这样做。
+private with @State. Just always do it.
+
+734
+00:58:51,920 --> 00:58:56,080
+因为如果你不这样做，它就会将该变量暴露给创建你的人，
+Because if you don’t, it’s going to expose that var to people creating you,
+
+735
+00:58:56,080 --> 00:58:59,600
+他们可能认为他们可以设置这个变量，但他们只能设置一次，
+and they might think they can set this var, but they’ll only be able to set it once,
+
+736
+00:58:59,600 --> 00:59:03,200
+因为你拥有这些数据。一旦他们设置了一次，
+because you own this data. Once they’ve set it once,
+
+737
+00:59:03,200 --> 00:59:06,960
+即使他们尝试再次设置它，也不会起作用，因为你已经取得了所有权。
+even if they try to set it again, it’s not going to work because you have taken ownership.
+
+738
+00:59:06,960 --> 00:59:13,520
+你就是这份状态的单一数据源。因此不要取消 private；@State 应始终声明为 private。
+You are the source of truth. So don’t make that not private. Always private. Always private.
+
+739
+00:59:13,520 --> 00:59:18,240
+关于 @State 的另一个小事情是，记住，如果你有 @State，
+The other minor thing about @State is, remember, if you have @State that’s a Dictionary or an
+
+740
+00:59:18,240 --> 00:59:23,840
+它是一个字典或一个数组，里面的所有东西，你也拥有它们。你也是这些的单一数据源。
+Array, all the things in there, you own those too. You’re the source of truth for those as well.
+
+741
+00:59:23,840 --> 00:59:27,280
+你是Array本身的单一数据源，也是Array中所有事物的单一数据源。
+You're the source of truth for the Array itself, but also all the things in the Array.
+
+742
+00:59:27,280 --> 00:59:31,200
+你也是这件事的单一数据源。@State 作为一个数组并不罕见，
+You’re the source of truth for that as well. And it’s not unusual to have @State that’s
+
+743
+00:59:31,200 --> 00:59:35,280
+但只要认识到这就是正在发生的事情。
+an Array, but just recognize that that’s what’s going on.
+
+744
+00:59:35,280 --> 00:59:39,200
+好吧，现在我们来谈谈今天的大事，那就是视图之间的共享数据。
+All right, now let’s talk about the big thing of the day, which is shared data between Views.
+
+745
+00:59:39,200 --> 00:59:45,120
+如何在视图之间共享数据？可以使用另一个属性包装器：@Binding。
+How do we share data between Views? We do this with another @ thing: @Binding.
+
+746
+00:59:45,120 --> 00:59:50,640
+所以 @Binding 和 @State 非常相似，除了单一数据源位于其他
+So @Binding is like @State, very similar, except the source of truth lives somewhere
+
+747
+00:59:50,640 --> 00:59:54,000
+地方并且你要绑定到它。那么让我们来谈谈它是如何工作的。
+else and you’re going to bind to it. So let’s talk about how this works.
+
+748
+00:59:54,000 --> 00:59:58,320
+我这里有 ViewA。 ViewA 有一个名为 myData 的事实来源。
+I have ViewA here. ViewA has a source of truth called myData.
+
+749
+00:59:58,320 --> 01:00:02,160
+这是 @State。您会看到它最初等于 42。
+It's an @State. You see it's equal to 42 there initially.
+
+750
+01:00:02,160 --> 01:00:06,800
+并且它想与 ViewB 共享 @State 的那一块。
+And it wants to share that piece of @State with ViewB.
+
+751
+01:00:06,800 --> 01:00:10,240
+换句话说，它希望 ViewB 能够更改 myData，
+In other words, it wants ViewB to be able to change myData,
+
+752
+01:00:10,240 --> 01:00:18,640
+将其从 42 更改为 27 或类似的内容。它的做法是使用参数 foo 创建 ViewB，
+change it from 42 to 27, or something like that. And the way it does that is it creates ViewB with
+
+753
+01:00:18,640 --> 01:00:23,200
+该参数是 @Binding。所以就有了 ViewB：
+this argument foo, which is an @Binding. So there’s ViewB: you see it
+
+754
+01:00:23,200 --> 01:00:26,320
+你会看到它有“@Bindingvar foo”。
+has "@Binding var foo". It’s not set to anything,
+
+755
+01:00:26,320 --> 01:00:30,960
+它没有设置任何内容，所以我们必须在创建 ViewB 时设置它，这就是我们正在做的事情。
+so we have to set it when we create ViewB, which is what we’re doing right there.
+
+756
+01:00:30,960 --> 01:00:37,600
+我们要设置 foo 的值是 $myData。
+And the value that we’re going to set foo to is $myData.
+
+757
+01:00:38,320 --> 01:00:48,000
+$myData 的意思是“与 myData 的绑定”。这就是 $ some@State 的含义：绑定到它。
+$myData means “a Binding to myData.” That’s what $ some @State means: a Binding to it.
+
+758
+01:00:48,000 --> 01:00:51,920
+这就是我们能够通过它的原因。如果我没有将 $ 放在那里，
+And so that’s why we’re able to pass it. If I didn’t put that $ there, the compiler
+
+759
+01:00:51,920 --> 01:00:58,160
+编译器会说类似“尝试将 Int 传递给 Binding，类型不匹配”之类的内容。
+would say something like “trying to pass an Int to a Binding, types don’t match.”
+
+760
+01:00:59,200 --> 01:01:09,649
+$myData 是一种不同的类型。这是 @Binding。在本例中，@Binding 为 Int。@State 是什么意思？
+$myData is a different type. It’s a @Binding. A @Binding to an Int in this case. What does @State mean?
+
+761
+01:01:09,649 --> 01:01:10,800
+这只是……是的，我之前谈过这个。
+Is that just something with… yeah, I talked about this before.
+
+762
+01:01:11,360 --> 01:01:14,960
+@State 实际上只是一个小宏，它为您创建两个变量：
+@State is actually just a little macro that makes two variables for you:
+
+763
+01:01:14,960 --> 01:01:23,280
+一个是 State 类型的 var，它是一个结构体，
+one is a var of type State, it’s a struct, that has a class pointer inside of it,
+
+764
+01:01:23,280 --> 01:01:27,200
+内部有一个类指针，该类指针指向堆并为您保留这一小块数据。
+and that class pointer points into the heap and keeps that little piece of data for you.
+
+765
+01:01:27,200 --> 01:01:30,560
+它创建的 var 称为 _<您的 var 的名称>。
+And that var it creates is called _<name of your var>.
+
+766
+01:01:30,560 --> 01:01:32,560
+您也会在 Binding 中看到这一点。
+And you’re going to see that here with Binding as well.
+
+767
+01:01:32,560 --> 01:01:36,880
+没有下划线的只是一个从堆中的 State 访问数据的小东西。
+The one without the underscore is just a little thing that accesses the
+
+768
+01:01:36,880 --> 01:01:40,320
+所以这只是将东西间接放入堆中的一种方法。
+data from the State in the heap. So it’s just a way to indirect
+
+769
+01:01:40,320 --> 01:01:42,880
+这就是 @State 的作用。
+things into the heap. That’s what @State does.
+
+770
+01:01:42,880 --> 01:01:48,080
+这就是为什么我们可以在视图中拥有可写数据的原因，因为视图是可写的。
+That’s why we can have writable data inside of a View, because Views are lets.
+
+771
+01:01:48,080 --> 01:01:53,600
+它们是只读的。它们是只读结构。我们能做到这一点的唯一方法就是拥有那个小 @State。
+They’re read-only. They’re read-only structs. The only way we can do it is by having that little @State.
+
+772
+01:01:53,600 --> 01:01:58,240
+如果您只想读取值而不写入值，是否有理由使用 @Binding？
+Is there a reason to use @Binding if you just intend to read a value but not write to it?
+
+773
+01:01:58,240 --> 01:02:02,320
+所以问题是：如果我只想读 foo，我会使用 @Binding 吗？
+So the question is: would I ever use @Binding if I was only going to read foo?
+
+774
+01:02:02,320 --> 01:02:07,040
+如果 ViewB 从未写入 foo，则它永远不会使用 @Binding。
+If ViewB never wrote to foo, it would never use @Binding.
+
+775
+01:02:07,040 --> 01:02:11,280
+@Binding 仅用于读写连接。这就是它的全部目的。
+@Binding is only for read-write connectivity. That's all it's for.
+
+776
+01:02:14,080 --> 01:02:18,880
+关于 @Binding 的一件有趣的事情是，绑定到绑定是合法的。
+One interesting thing about @Binding is it is legal to have a Binding to a Binding.
+
+777
+01:02:18,880 --> 01:02:23,600
+所以你可以在 Binding 上说 $，比如 $foo。那行得通。
+So you can say $ on a Binding, like $foo. That works.
+
+778
+01:02:23,600 --> 01:02:31,040
+它通过 Binding 绑定到外部的 @State，所以和 $myData 基本一样。
+It binds through the Binding to the outside @State, so it's basically the same as $myData.
+
+779
+01:02:31,040 --> 01:02:35,760
+这是合法的。这意味着您与之共享数据的视图也
+That is legal. That means that Views you share your data with can
+
+780
+01:02:35,760 --> 01:02:39,920
+可以转身并与其他视图共享。你无法阻止他们。
+turn around and share it with other Views too. You can’t stop them.
+
+781
+01:02:40,800 --> 01:02:44,160
+这就是我所说的 @State。所以这里是 @Binding。
+This is what I was saying about @State. So here it is for @Binding.
+
+782
+01:02:44,160 --> 01:02:51,200
+@Binding 正在创建一个小 Binding<Int>。 Binding 是泛型类型，就像 Array 是泛型类型一样。
+@Binding is creating a little Binding<Int> . Binding is generic type, like Array is generic type.
+
+783
+01:02:51,200 --> 01:02:55,440
+因此，它在那里创建了一个 Binding<Int>，称为 _foo。
+So a Binding<Int> is what it's creating there, called _foo.
+
+784
+01:02:55,440 --> 01:03:02,080
+里面有链接到 @State 的神奇代码。
+And inside there is the magic code that links over to that @State thing.
+
+785
+01:03:02,960 --> 01:03:14,160
+而不带下划线的 foo 是实际使用的绑定数据，它是一个计算属性。
+And then the actual boundData named foo (with no underscore), that thing is just a computed var.
+
+786
+01:03:14,160 --> 01:03:18,000
+它是使用 Binding 东西计算出来的。
+It's computed using the Binding thing to get back at it.
+
+787
+01:03:18,000 --> 01:03:22,320
+它是一个既可以获取也可以设置的计算属性（我们还没有见过；
+It's a computed property that's both get and set (which we haven't seen;
+
+788
+01:03:22,320 --> 01:03:27,040
+此前只见过 var body 这种只读计算属性），这里的原理就是如此。
+we've only seen get-only ones like var body), but that's what's going on there.
+
+789
+01:03:29,840 --> 01:03:35,680
+_foo 就像 @State 的 _ 一样。我会告诉你那是什么样子的。
+That _foo is like _ for the @State thing. I'll show you what that looks like.
+
+790
+01:03:35,680 --> 01:03:41,600
+就像我们有时在 init 中访问这些东西一样。但现在不用担心。
+Like we sometimes access those things in an init. But don't worry about that for now.
+
+791
+01:03:43,040 --> 01:03:46,240
+与 @Binding 相反的是：永远不要与 @Binding 保持私有。
+The opposite thing with @Binding here: never have private with @Binding.
+
+792
+01:03:46,240 --> 01:03:49,040
+事实上，编译器甚至可能不允许你这样做。
+In fact, the compiler probably won’t even allow you to do that.
+
+793
+01:03:49,040 --> 01:03:52,720
+这是有道理的，对吧？因为绑定是某人向您传递与其数据的绑定，
+And it makes sense, right? Because a Binding is someone passing you a Binding
+
+794
+01:03:52,720 --> 01:03:57,520
+所以他们必须可以访问它。它不可能是私人的，
+to their data, so it has to be accessible to them. It can’t be private, how would
+
+795
+01:03:57,520 --> 01:04:00,000
+他们如何将其传递给你？因此，
+they pass it to you? So it makes no sense
+
+796
+01:04:00,000 --> 01:04:03,760
+拥有私有的 @Binding 是没有意义的。编译器甚至可能不允许它。
+to have a @Binding that would be private. The compiler probably won’t even allow it.
+
+797
+01:04:03,760 --> 01:04:07,200
+所以它与 @State 相反。@Binding 从来没有私有；
+So it’s the opposite of @State. @Binding never has private;
+
+798
+01:04:07,200 --> 01:04:13,520
+@State 始终具有私有性。您可以使用 .constant 创建常量 Bindings，
+@State always has private. You can create constant Bindings with .constant,
+
+799
+01:04:13,520 --> 01:04:24,720
+它是 Binding 上的静态函数。所以在这里我创建了这个 Binding<Int>.constant。这是对数字 5 的绑定。
+which is a static func on Binding. So here I’ve created this Binding<Int>.constant. That’s a Binding to the number 5.
+
+800
+01:04:24,720 --> 01:04:28,320
+即使有人试图改变它的价值，它也不会改变；它永远是5。
+Even if someone tries to change the value of it, it will not change; it will always be 5.
+
+801
+01:04:28,320 --> 01:04:32,400
+这是一个常量。绑定到一个常量。
+It’s a constant. Binding to a constant.
+
+802
+01:04:32,400 --> 01:04:35,680
+使用函数传递数据：我必须非常快速地浏览这个内容。
+Passing data using functions: I’m going to have to zoom through this really fast.
+
+803
+01:04:35,680 --> 01:04:43,680
+其实很直观。有些函数属于 giveSomething：接收函数的视图会调用它，把数据传回给你。
+It’s pretty obvious, really. Some functions are giveSomething functions, functions that the View you’re handing the function
+
+804
+01:04:43,680 --> 01:04:47,920
+另一些属于 getSomething，例如 VStack 的
+to is going to call to give you something. And some of them are getSomething functions, like
+
+805
+01:04:47,920 --> 01:04:53,200
+content 参数会调用闭包来“取得”内容。giveSomething 类型的函数相当常见。
+VStack’s content argument is “getting” something. giveSomethings are not that uncommon.
+
+806
+01:04:53,200 --> 01:04:56,800
+我们将使用......好吧，我将在周三这样做，这样你就可以看到这是什么样的。
+We’ll use… well, I’m going to do this on Wednesday so you can see what this is like.
+
+807
+01:04:56,800 --> 01:05:02,480
+getSomething 相对少见，常见于 @ViewBuilder；@ViewBuilder 闭包基本都属于这一类。
+getSomething is more rare. You see it with @ViewBuilders. Of course, @ViewBuilders are all getSomething kinds of things.
+
+808
+01:05:06,560 --> 01:05:12,640
+我们实际上并没有那么多地使用它们。这张幻灯片我基本上会跳过。
+We don’t really use them that much. This slide I’m just going to basically skip over.
+
+809
+01:05:12,640 --> 01:05:17,600
+你可以把它记在笔记中，以便我们讨论到这一点时可以回顾一下。
+You can have it in your notes to go look back on when we get to this.
+
+810
+01:05:17,600 --> 01:05:21,360
+但最终我们会遇到一个问题，即我们将一个函数传递
+But eventually we’re going to get to a problem where we’re passing a function
+
+811
+01:05:21,360 --> 01:05:27,120
+给 init 或另一个函数，而接收方会保存这个函数。
+to an init or to another function and that thing is going to hold on to that function.
+
+812
+01:05:27,120 --> 01:05:29,200
+它不会立即执行，而是保存下来，稍后再调用，
+It’s not going to immediately execute it; it’s going to hold
+
+813
+01:05:29,200 --> 01:05:32,720
+Button 就是如此：传入的 action 闭包要等按钮被点击时才会执行。
+on to it and call it later, like a Button does. You give it the thing and it doesn’t call it till
+
+814
+01:05:32,720 --> 01:05:35,600
+这种情况下，必须把闭包参数标记为 @escaping。
+later when the Button gets pressed. And when that happens, you have to
+
+815
+01:05:35,600 --> 01:05:39,360
+也就是说，该闭包会逃逸出当前的词法作用域，
+mark that thing as @escaping. In other words, it escapes this
+
+816
+01:05:39,360 --> 01:05:46,000
+从而让 Swift 知道它可能需要被存储在堆上。
+lexical context that it’s in, and that lets Swift know that it needs to put that thing in the heap.
+
+817
+01:05:46,560 --> 01:05:52,720
+这可能会让你们中的一些人感到惊讶，但是闭包具有引用语义。
+This might stun some of you, but a closure has reference semantics.
+
+818
+01:05:52,720 --> 01:05:55,840
+它不是一个类，它与类没有任何关系。
+It’s not a class, it’s not related to a class in any way.
+
+819
+01:05:55,840 --> 01:05:59,040
+类具有引用语义；闭包具有引用语义。
+Classes have reference semantics; closures have reference semantics.
+
+820
+01:05:59,040 --> 01:06:04,480
+原因是闭包可能需要存活在堆上，并保存它捕获的所有局部变量，
+And the reason is that they need to possibly live in the heap and store all those local vars that
+
+821
+01:06:04,480 --> 01:06:08,800
+这样稍后调用闭包时，这些变量仍然可用。
+they capture in the heap, so they’re with them when they’re called later.
+
+822
+01:06:09,840 --> 01:06:12,560
+这就是闭包具有引用语义的原因。
+That’s why that’s true. And then this thing at the bottom is how
+
+823
+01:06:12,560 --> 01:06:16,480
+幻灯片底部还展示了如何声明 Optional 函数：把函数类型括起来，再在后面加上 ?。
+you can make a function be an Optional function. You just put parentheses around a question mark.
+
+824
+01:06:16,480 --> 01:06:20,640
+函数变成 Optional 后，可以在函数名后使用 ? 进行可选调用。
+Now it’s an Optional function, and the way you call it is by putting the question mark after the
+
+825
+01:06:20,640 --> 01:06:26,640
+我也会在演示中向您展示这一点。
+name of the function when you’re calling it. And I'll show you that in demo as well.
+
+826
+01:06:27,600 --> 01:06:30,960
+我已经讨论了所有这些东西，但我没有提到视图之间共享东西的最重要的方式，
+I’ve talked about all this stuff and I haven’t mentioned the most important way
+
+827
+01:06:30,960 --> 01:06:35,280
+这就是这个叫做 @Observable 的东西。
+to share things between Views, which is this thing called @Observable.
+
+828
+01:06:35,280 --> 01:06:38,560
+这就是我们分享内容的真正方式，我将向您展示 @Observable。
+That’s really how we’re going to share things, and I will show you @Observable.
+
+829
+01:06:38,560 --> 01:06:42,400
+我们将在几周内将我们的 CodeBreaker 变成 @Observable。
+We are going to make our CodeBreaker be an @Observable in a couple of weeks.
+
+830
+01:06:42,400 --> 01:06:47,440
+但我只是不希望任何了解 Swift 的人在观看这个演示时说：“什么？
+But I just don’t want anyone who knows Swift who’s watching this presentation and saying, “What?
+
+831
+01:06:47,440 --> 01:06:50,880
+@Binding，很好，但是 @Observable 呢？这是世界上最伟大的分享。”
+@Binding, great, but what about @Observable? It’s the world’s greatest sharing thing.”
+
+832
+01:06:50,880 --> 01:06:53,200
+是的，确实如此。只是你还没学会，
+And yes, it is. It’s just that you haven’t
+
+833
+01:06:53,200 --> 01:06:57,680
+我也没教。基本上，@Observable 基本上类似于 @Binding，
+learned it yet, and I haven’t taught it. Basically, @Observable is basically like
+
+834
+01:06:57,680 --> 01:07:02,480
+但对于类，对于具有引用语义的事物。
+@Binding but for classes, for things that have reference semantics.
+
+835
+01:07:02,480 --> 01:07:05,920
+今天就这样。有点过了，抱歉。
+And that is it for today. Went over a little bit, sorry there.
+
+836
+01:07:05,920 --> 01:07:08,880
+星期三将是所有演示，我将向您展示所有这些内容，
+Wednesday is going to be all demo, and I'm going to show you all this stuff,
+
+837
+01:07:08,880 --> 01:07:19,520
+所有这些数据流内容。我们将执行 @Binding 和函数传递，以及所有这些内容。好吧，到时候见。
+all this data flow stuff. We’ll do @Binding and function passing, and all that stuff. All right, see you then.

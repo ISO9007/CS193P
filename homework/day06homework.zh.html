@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS193P 作业 III：CodeWord Breaker（中文翻译）</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --stanford-red: #c90025;
+      --rule-blue: #1fa7df;
+      --paper: #fff;
+      --ink: #111;
+      --muted-code: #aaa;
+      --kw: #b02ab8;
+      --type: #3b22c8;
+      --name: #0088bf;
+      --string: #e83b27;
+      --serif: Baskerville, "Baskerville MT", "Songti SC", STSong, SimSun, serif;
+      --display: "Big Caslon", Baskerville, "Songti SC", STSong, serif;
+      --sans: "Gill Sans", "Gill Sans MT", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: Menlo, Monaco, Consolas, "SFMono-Regular", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      background: #e8eaed;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 18.5px;
+      line-height: 1.43;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .document { padding: 28px 0 48px; }
+
+    .page {
+      position: relative;
+      width: 816px;
+      height: 1056px;
+      margin: 0 auto 28px;
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 10px 34px rgba(0, 0, 0, .16);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .page:last-child { page-break-after: auto; break-after: auto; }
+
+    .running-head,
+    .running-foot {
+      position: absolute;
+      left: 96px;
+      width: 624px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1px;
+      background: var(--stanford-red);
+      color: #fff;
+      font: 11px/14px var(--sans);
+      text-transform: uppercase;
+      letter-spacing: .005em;
+    }
+
+    .running-head { top: 47px; }
+    .running-foot { bottom: 48px; }
+
+    .content {
+      position: absolute;
+      inset: 94px 96px 78px;
+    }
+
+    .page-title {
+      margin: 24px 0 34px;
+      color: var(--stanford-red);
+      font: 400 58px/1.18 var(--display);
+      letter-spacing: -.025em;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      padding-top: 7px;
+      border-top: 1px dashed var(--rule-blue);
+      color: var(--stanford-red);
+      font: 700 19px/1.15 var(--sans);
+    }
+
+    p { margin: 0 0 16px; }
+    strong { font-weight: 700; }
+    em { font-style: italic; }
+
+    code {
+      font-family: var(--mono);
+      font-size: .82em;
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+
+    .section { margin-bottom: 26px; }
+    .section.tight { margin-bottom: 20px; }
+    .section p { margin-left: 13px; }
+
+    .tasks,
+    .hints,
+    .challenge {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: item;
+    }
+
+    .tasks li,
+    .hints > li,
+    .challenge > li {
+      position: relative;
+      margin: 0 0 14px 34px;
+      counter-increment: item;
+    }
+
+    .tasks li::before,
+    .hints > li::before,
+    .challenge > li::before {
+      content: counter(item) ".";
+      position: absolute;
+      left: -34px;
+      width: 24px;
+      text-align: right;
+    }
+
+    .subtasks {
+      margin: 8px 0 0 23px;
+      padding: 0;
+      list-style: lower-alpha;
+    }
+
+    .subtasks li { margin: 0 0 7px; }
+
+    .compact { font-size: 17px; line-height: 1.38; }
+    .compact p { margin-bottom: 13px; }
+    .compact .tasks li,
+    .compact .hints > li,
+    .compact .challenge > li { margin-bottom: 12px; }
+
+    .small { font-size: 16.2px; line-height: 1.34; }
+    .small p { margin-bottom: 11px; }
+    .small .hints > li { margin-bottom: 10px; }
+
+    .tiny { font-size: 15.2px; line-height: 1.29; }
+    .tiny p { margin-bottom: 9px; }
+    .tiny .hints > li { margin-bottom: 9px; }
+
+    .evaluation {
+      margin: 0 0 18px 32px;
+      padding: 0;
+    }
+
+    .evaluation li { margin: 0 0 8px; }
+
+    .code-note {
+      margin: 17px 0 10px 20px;
+      font-family: var(--serif);
+      font-size: .9em;
+    }
+
+    pre.code {
+      margin: 0 0 22px 58px;
+      color: #111;
+      font: 15.5px/1.32 var(--mono);
+      white-space: pre;
+      background: transparent;
+    }
+
+    pre.code.narrow { margin-left: 84px; }
+    pre.code.small-code { font-size: 14.8px; line-height: 1.29; margin-bottom: 18px; }
+    .muted { color: var(--muted-code); }
+    .kw { color: var(--kw); }
+    .type { color: var(--type); }
+    .name { color: var(--name); }
+    .string { color: var(--string); }
+    .deleted { color: #ff6658; text-decoration: line-through; }
+
+    @media (max-width: 840px) {
+      body { overflow-x: auto; }
+      .document { width: 816px; padding: 12px 0 24px; }
+      .page { margin-bottom: 12px; }
+    }
+
+    @page { size: Letter; margin: 0; }
+
+    @media print {
+      body { background: #fff; }
+      .document { padding: 0; }
+      .page { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <article class="page" aria-label="第 1 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h1 class="page-title">作业 III：<br>CodeWord Breaker</h1>
+
+        <section class="section">
+          <h2>目标</h2>
+          <p>现在是时候稍微离开课堂示例，构建你自己的应用了。这个应用你可能会觉得非常熟悉！它也和 Code Breaker 极其相似，所以希望你能够大量利用本季度到目前为止我们在课堂中完成的内容。</p>
+          <p>你必须构建一个 Code Breaker 的版本（应用名称可以由你自己决定），其中的 code（包括 master code 和所有猜测）都必须是英语单词，而不是彩色圆点或 emoji。这意味着会有 26 种 peg 选择（英语中的 26 个字母）。这样游戏会相对困难，所以不要用 <code>MatchMarkers</code> 来显示某次尝试的匹配结果；你可以直接向用户展示哪些 peg 是 exact match，哪些是 inexact match。</p>
+          <p>不要修改你在 A2 中的 Code Breaker。请从一个新应用开始。</p>
+          <p>一定要查看下面的“提示”部分！</p>
+        </section>
+
+        <section class="section tight">
+          <h2>截止时间</h2>
+          <p>本次作业需在第 9 次课开始之前完成。</p>
+        </section>
+
+        <section class="section tight">
+          <h2>材料</h2>
+          <p>你可以使用所有讲座中的代码（也就是 <code>.swift</code> 文件里的文本），也可以使用你完成的作业 1 和作业 2 解答中的代码。但你必须把这些代码放在一个<strong>从零创建的新应用</strong>中使用。</p>
+          <p>一定要查看第 6 讲之后发布的代码。</p>
+          <p>你可能会发现第 6 讲代码包中的 <code>Words.swift</code> 文件很有帮助。</p>
+          <p><strong>不要使用 AI。</strong>你的应用代码必须完全是你自己的工作（课堂上展示过的代码除外）。<strong>不要从互联网或 AI 导入代码。</strong></p>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 1 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 2 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <h2>必做任务</h2>
+        <ol class="tasks">
+          <li>你必须把这个应用作为一个新应用开始（也就是说，不要复制已有应用）。在命名前请仔细想一想（先读完所有必做任务再决定）。<strong>不要</strong>把它叫作 CodeBreaker。你可以根据需要，从 A1、A2 和所有课堂代码中复制粘贴代码到这个新应用里，但不要复制整个项目，只复制文件中的代码。</li>
+          <li>创建一个基于单词的 Code Breaker 应用。它应该具备 Code Breaker 到至少第 6 讲为止的所有功能，但有两个例外：
+            <ol class="subtasks">
+              <li>所有 code（master code 和所有 attempt）都必须是英语中的有效单词（这意味着彩色圆点和 emoji 不再是有效 code，而且会有 26 种 peg 选择，也就是英语字母）。</li>
+              <li>每个 “peg” 的匹配状态必须显示在 peg 本身上（也就是说，不要显示在旁边的 <code>MatchMarkers</code> 中）。你可以用任何颜色或装饰方式来区分 <code>.exact</code>、<code>.inexact</code> 或 <code>.nomatch</code>。</li>
+            </ol>
+          </li>
+          <li>因为用户必须能够猜测任何 code，所以你的 “peg chooser” 必须包含英语中的所有字母。你必须把这个 “peg chooser” 中的按钮排成 QWERTY 键盘的布局（也就是典型英语键盘的排列）。</li>
+          <li>必做任务 2 意味着你仍然必须支持重新开始游戏，并且必须支持长度从 3 到 6 个字母不等的单词。</li>
+          <li>让你的应用拥有漂亮的动画。其中大部分会涉及把第 7、8 讲中适用于你应用 UI 的动画工作整合进来（也就是第 7、8 讲中所有对你的 UI 有意义的动画）。这也可能需要一点点专属于你 UI 的额外动画工作。最终取决于你的 UI。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 2 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 3 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <h2>提示</h2>
+        <ol class="hints">
+          <li>下面是你可以对 L6 代码做的一些简单修改，用来快速启动你的解答。它应该能让你先跑起来一个骨架版本的应用，虽然还会剩下很多工作。使用这些代码<strong>绝对、肯定不是</strong>必做任务。如果你不知道从哪里开始，我们只是想在这里推你一把。如果你愿意，也完全可以全部忽略。</li>
+        </ol>
+
+        <p class="code-note">在 <code>CodeBreaker.swift</code> 中（<code>Peg</code> 现在和 A2 一样是 <code>String</code>；choices 是所有字母）...</p>
+        <pre class="code"><span class="muted">typealias Peg = </span><span class="type">String</span>
+
+<span class="muted">struct CodeBreaker {
+    var masterCode: Code = Code(kind: .master(isHidden: true))
+    var guess: Code = Code(kind: .guess)
+    var attempts: [Code] = []
+    let pegChoices: [Peg]
+
+    init(</span><span class="deleted">pegChoices: [Peg]</span><span class="muted">) {
+        </span><span class="name">pegChoices</span> = <span class="string">"QWERTYUIOPASDFGHJKLZXCVBNM"</span>.<span class="kw">map</span> { <span class="type">String</span>($0) }
+<span class="muted">        masterCode.randomize(from: pegChoices)
+    }
+}</span></pre>
+
+        <p class="code-note">在 <code>Code.swift</code> 中（方便把一个 <code>Code</code> 的 pegs 设置成某个单词）...</p>
+        <pre class="code"><span class="muted">struct Code {
+    var kind: Kind
+    var pegs: [Peg] = Array(repeating: missing, count: </span><span class="type">5</span><span class="muted">)
+
+    static let missing: Peg = </span><span class="string">""</span>
+
+    <span class="kw">var</span> <span class="name">word</span>: <span class="type">String</span> {
+        <span class="kw">get</span> { pegs.<span class="type">joined</span>() }
+        <span class="kw">set</span> { pegs = newValue.map { <span class="type">String</span>($0) } }
+    }
+}</pre>
+
+        <p class="code-note">在 <code>PegView.swift</code> 中（pegs 不再是 Colors）...</p>
+        <pre class="code small-code"><span class="muted">var body: some View {
+    pegShape
+        </span><span class="deleted">.foregroundStyle(peg)</span>
+        .<span class="type">stroke</span>()
+        .<span class="type">overlay</span> { <span class="type">Text</span>(peg) }</pre>
+      </div>
+      <footer class="running-foot"><span>第 3 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 4 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <p class="code-note">在 <code>PegChooser.swift</code> 中（在你的 Qwerty 键盘跑起来之前，你需要先做点事情来选择字母。下面这段代码会生成 26 个超小按钮，所以至少聊胜于无，虽然不算太好用。也许你开发早期的一步，是先把 peg chooser 更新成显示 3 行字母，即使它们还不严格符合 Qwerty 排列？）</p>
+
+        <pre class="code narrow"><span class="muted">Button {
+    onChoose(peg)
+} label: {
+    </span><span class="type">Text</span>(peg)
+<span class="muted">}</span></pre>
+
+        <ol class="hints" start="2" style="counter-reset: item 1;">
+          <li>上面的提示只能让你开始处理 5 个字母的单词，而且还没有 restart 按钮，所以你需要把 A2 中学到的东西应用到 A3。</li>
+          <li>你可以从任何你选择的地方获取英语单词，作为游戏的 master code；但最简单的来源大概是提供的 <code>Words.swift</code>（在 L6 demo 代码下载包中）。它创建了一个名为 <code>words</code> 的 <code>@Environment</code> 变量，你可以用它按长度查找随机单词。<strong>只在你的 UI 中访问这些 words（不要在 Model 中访问！）——这意味着你需要从 UI 代码把某一局游戏的 master code 传入 Model。</strong>如果你想使用 <code>Words.swift</code>，请确保任何想使用 <code>words</code> 的 <code>View</code> 顶部都有这段代码。</li>
+        </ol>
+
+        <pre class="code small-code"><span class="muted">struct CodeBreakerView: View {
+    </span><span class="kw">@Environment</span>(\.<span class="kw">words</span>) <span class="kw">var</span> <span class="name">words</span></pre>
+
+        <p>然后直接使用 <code>Words.swift</code> 中的 <code>random(length:)</code> 函数来生成随机单词。</p>
+      </div>
+      <footer class="running-foot"><span>第 4 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 5 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small">
+        <ol class="hints" start="4" style="counter-reset: item 3;">
+          <li>这些 words 是从互联网加载的，所以如果网络连接不好，它们可能需要一点时间才能可用。下面这个很酷的 view modifier 可能能帮助处理初次启动时可能出现的“延迟”。你可以把这个 view modifier 应用到主游戏 View 的 <code>var body</code> 里几乎任何一个 View 上（例如最顶层的 <code>VStack</code>）。当 <code>words</code> 这个 <code>@Environment</code> 变量真正被更新并且里面有一些单词时，它会做出响应（也就是从网络下载完成之后；这可能耗时几毫秒、几秒，或者如果网络断了就永远等不到）。这也展示了如何从 <code>words</code> 中取出指定长度的随机单词。</li>
+        </ol>
+
+        <pre class="code small-code"><span class="muted">.onChange(of: words.count, initial: true) {
+    if game.attempts.count == 0 { </span>// 不要打断正在进行的游戏<span class="muted">
+        if words.count == 0 { </span>// 还没有 words<span class="muted">
+            game.masterCode.word = </span><span class="string">"AWAIT"</span><span class="muted">
+        } else {
+            game.masterCode.word = words.random(length: </span><span class="type">5</span><span class="muted">) ?? </span><span class="string">"ERROR"</span><span class="muted">
+        }
+    }
+}</span></pre>
+
+        <p>注意，如果 <code>onChange</code> 在游戏已经开始之后（<code>game.attempts.count &gt; 0</code>）才发现 words 到达，那么你就会继续玩以 <code>AWAIT</code> 为答案的那局。还要注意，一旦 words 已经到达，如果找不到长度为 5 的单词（理论上不该发生，但谁知道呢！），用户会玩到以 <code>ERROR</code> 为答案的游戏。</p>
+        <p>这个 <code>onChange(of:)</code> 只会激活两次：游戏 View 第一次出现时（因为有 <code>initial: true</code>），以及 <code>Words.swift</code> 完成加载一些 words 时（<code>words.count &gt; 0</code>）。所以在其他所有需要 master code 的时候（例如游戏重开时），你都必须自己从 <code>words</code> 里取（上面的代码不会替你完成）。</p>
+        <p>希望到用户点击 restart 的时候，words 已经从网络加载完成；但如果还没有，你需要做一些合理处理（有点像上面的 <code>onChange</code> 在启动阶段尝试做的那样）。</p>
+        <p>最后，请注意这个 <code>onChange(of:)</code> 假设单词长度是 5。当你支持 3、4、6 个字母的单词时，需要相应调整。</p>
+      </div>
+      <footer class="running-foot"><span>第 5 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 6 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content tiny">
+        <ol class="hints" start="5" style="counter-reset: item 4;">
+          <li><code>Words.swift</code> 文件还给 SwiftUI 的 <code>UITextChecker</code> 添加了一个名为 <code>isAWord</code> 的函数。它会返回某个 <code>String</code> 是否是英语单词。你可以随意使用它来测试用户的猜测是否是有效单词。<code>isAWord</code> 是区分大小写的（因为它能区分是否是专有名词），所以你大概会希望把要测试的单词都转成小写（可以用 <code>.lowercased()</code>）。你也可以用上面提到的 <code>words</code> 变量来验证用户猜测，但 <code>words</code> 只包含“常用词”（这对选择隐藏的 master code 单词来说有一定道理，但在验证用户猜测时可能过于严格）。这些都由你决定。只要满足上面的必做任务，你可以按自己认为最好的方式选择 master code 单词并验证猜测。下面是用 <code>UITextChecker</code> 来验证用户猜测是否为英语单词的示例 ...</li>
+        </ol>
+
+        <pre class="code small-code"><span class="kw">@State</span> <span class="kw">private var</span> <span class="name">checker</span> = <span class="type">UITextChecker</span>()
+
+<span class="kw">if</span> <span class="name">checker</span>.isAWord(<span class="name">guess</span>) { … }</pre>
+
+        <ol class="hints" start="6" style="counter-reset: item 5;">
+          <li>总结上面的提示 3 和 5：使用 <code>words.random(length:)</code> 来选择你的 master code，并使用 <code>UITextChecker</code> 的 <code>isAWord()</code> 来测试用户的猜测是否是有效英语单词。再次强调，这只是提示，不是必做任务。</li>
+          <li>在开发应用时，临时在你的 <code>CodeBreaker</code> 代码中指定 <code>.master(isHidden: false)</code> 可能会有帮助，这样你能看到 master code 是什么。等功能跑通之后，再把它设回 <code>true</code>。</li>
+          <li>明确一下，本次作业中你<strong>不会</strong>使用 <code>MatchMarkers.swift</code>。</li>
+          <li>由于不再有 match markers，你的 UI 现在会非常依赖每个 peg 的绘制方式（因为你必须在 peg 上显示匹配状态）。你可能会想增强你的 <code>PegView</code>，让它接受更多参数，用来指定不同类型 “peg looks” 该如何绘制。</li>
+          <li>实际上，由于这一点，你用于绘制 Codes 的代码（在 <code>CodeView</code> 中）很可能会变得更简单，而不是更复杂。例如，selection 也许只是 peg 的另一种绘制方式（包括如何绘制 <code>.missing</code> peg）。也许隐藏的 master code 也是如此？当然，这完全取决于你选择如何表示匹配。</li>
+          <li>通常建议你不要把 A2 中做过的任何 Challenge Mode 工作带到 A3 中（这样能让你的 A3 代码更简单）。反正其中大多数也不适用。再次强调，这只是提示，不是必做任务。</li>
+          <li>Qwerty 键盘任务主要是关于掌握 layout。Layout 可能有点棘手，所以如果第一次尝试的结果和你预期不一样，不要沮丧。</li>
+          <li>宽高比在 layout 中可能是非常好的朋友。例如，你的 Qwerty 键盘有一个众所周知的宽高比（也就是顶行按键数量 10 与行数 3 的比值）。类似地，你大概也希望每个按键有相同的宽高比。强制这两点也许能帮助 SwiftUI 在布局时更好地理解你的意图。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 6 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 7 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <ol class="hints" start="14" style="counter-reset: item 13;">
+          <li>最后一个必做任务（动画）需要第 7 讲和第 8 讲的内容，所以把它留到最后做。如果你的动画真的做得很棒（也就是说，做出一些非常酷、超出课堂所示类型的东西），下面的 Challenge Modes 中有一点额外加分空间，可以奖励你这样做。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 7 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 8 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <section class="section">
+          <h2>评分标准</h2>
+          <p>在本季度的所有作业中，目标都是写出高质量代码，让它能够在没有警告或错误的情况下构建，然后测试生成的应用，并不断迭代直到它能正常工作。</p>
+          <p>下面是作业被扣分最常见的原因：</p>
+          <ul class="evaluation">
+            <li>项目无法构建。</li>
+            <li>“必做任务”部分中的一个或多个项目没有完成。</li>
+            <li>没有理解某个基础概念。</li>
+            <li>项目无法在没有警告的情况下构建。</li>
+            <li>代码在视觉上很潦草、难以阅读（例如缩进不一致等）。</li>
+            <li>因为缺少注释、变量/方法命名差、解法结构差、方法过长等原因，你的解答让阅读代码的人难以（或不可能）理解。</li>
+          </ul>
+          <p>学生经常问：“我到底需要给代码写多少注释？”答案是：你的代码必须能让任何阅读它的人轻松、完整地理解。你可以假设读者知道 iOS API，也知道课堂中 Code Breaker 游戏代码的工作方式，但不应该假设他们已经知道你（或任何人）对这个作业的解法。</p>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 8 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 9 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <h2>Challenge Mode</h2>
+        <p>Challenge Mode 是一个机会，让你扩展本周所学，并用更困难的练习推动自己。强烈建议你每周尝试其中一个或多个，以便从这门课中获得最大收益。</p>
+        <ol class="challenge">
+          <li><span>2 分。</span>在 Qwerty 键盘的每个按键上，给用户反馈，显示该键在本局游戏到目前为止任何一次 attempt 中曾经得到过的<strong>最佳结果</strong>（exact、inexact、nomatch 或“还没试过”）。你大概会想使用和游戏本身相同（或类似）的视觉外观，在每个按键上表示这些状态。</li>
+          <li><span>1 分。</span>不要随机选择 code 长度（也就是 3 到 6 之间），而是在应用中添加 UI，让用户在重新开始游戏时选择要玩的 code 长度。</li>
+          <li><span>1 分。</span>把你的 guess 按钮和一个 “backspace” 键整合到 Qwerty 键盘中的某个位置。backspace 键会把 selection 往回退一格，并移除它到达的新位置上的任何字母。这主要是一个 layout 挑战。</li>
+          <li><span>1 分。</span>在你的解答中有意义地使用一个 tuple 和/或一个 extension。我们还没有在课堂中讲过 tuple（除了提到 <code>TupleView</code>，但那和这里无关），所以这是关于理解你的阅读作业并加以应用。至于 extension，只有当你加进 extension 的代码确实不应该放在别的地方时，才能拿到这一分。</li>
+          <li><span>1 分。</span>如果你做了一些额外的动画工作，我们可能会给一分。多少算够？它必须真的展示出你对某些动画机制的充分理解。让我们说出：“wow, cool, nice animation(s) there.” 我们不会“预先批准”你的动画选择，所以这个 Challenge Mode 能否拿到额外加分有点像掷骰子；不过过程本身就是奖励，所以最差也不过是你会学到更多动画知识！</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 9 页，共 9 页</span><span>作业 III：CodeWord Breaker</span></footer>
+    </article>
+  </main>
+</body>
+</html>
