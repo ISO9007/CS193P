@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CodeBreakerView: View {
     // MARK: Data Owned by me
-    @State private var game = CodeBreaker(pegsChoise: [.yellow, .gray, .black, .brown])
+    @State private var game = CodeBreaker()
     @State private var selection: Int = 0
     
     // MARK: - body
@@ -26,12 +26,15 @@ struct CodeBreakerView: View {
                 }
                 
             }
-            PegChooser(choise: game.pegsChoise) { peg in
+            PegChooser(choise: game.pegsChoise, gameKind: game.gameKind) { peg in
                 game.setGuessPeg(peg: peg, at: selection)
                 selection = (selection + 1) % game.guess.pegs.count
             }
         }
         .padding()
+        .onAppear {
+            game.resetGame()
+        }
     }
     
     var guessbutton: some View {
@@ -49,6 +52,7 @@ struct CodeBreakerView: View {
         Button("Reset Game") {
             withAnimation {
                 game.resetGame()
+                selection = 0
             }
             
         }
@@ -58,14 +62,15 @@ struct CodeBreakerView: View {
     
     func view(for code: Code) -> some View {
         HStack {
-            CodeView(code: code, selection: $selection)
+            CodeView(code: code, gameKind: game.gameKind, selection: $selection)
             Color.clear.aspectRatio(1, contentMode: .fit)
                 .overlay {
                     if let matches = code.matches {
                         MatchMarkers(matchs: matches)
-                    }
-                    else if code.kind == .guess {
+                    }else if code.kind == .guess {
                         guessbutton
+                    }else if case .master(_) = code.kind {
+                        resetGameButton
                     }
                 }
         }
