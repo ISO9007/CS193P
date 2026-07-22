@@ -16,11 +16,7 @@ struct PegView: View {
     
     // MARK: - body
     var body: some View {
-        pegShape.overlay {
-                if peg == Peg.pegMissing {
-                    pegShape.strokeBorder(.gray, lineWidth: 1)
-                }
-            }
+        pegShape
             .contentShape(pegShape) // 响应命中形状, 这样就算View是透明颜色也可以响应点击
             .foregroundStyle(peg)
             .aspectRatio(1, contentMode: .fit)

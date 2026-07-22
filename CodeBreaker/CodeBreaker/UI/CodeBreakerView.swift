@@ -15,14 +15,20 @@ struct CodeBreakerView: View {
     // MARK: - body
     var body: some View {
         VStack {
-            view(for: game.masterCode)
+            CodeView(code: game.masterCode)
             ScrollView {
                 if !game.isOver {
-                    view(for: game.guess)
+                    CodeView(code: game.guess, selection: $selection) {
+                        guessbutton
+                    }
                 }
                 
                 ForEach(game.attempts.indices.reversed(), id: \.self) { index in
-                    view(for: game.attempts[index])
+                    CodeView(code: game.attempts[index]) {
+                        if let matches = game.attempts[index].matches {
+                            MatchMarkers(matchs: matches)
+                        }
+                    }
                 }
                 
             }
@@ -30,12 +36,20 @@ struct CodeBreakerView: View {
                 game.setGuessPeg(peg: peg, at: selection)
                 selection = (selection + 1) % game.guess.pegs.count
             }
+
         }
         .padding()
     }
     
     var guessbutton: some View {
         Button("Guess") {
+            
+            withAnimation(.linear(duration: 30)) {
+                // 设置状态变化
+            } completion: {
+                // 动画完成后
+            }
+
             withAnimation {
                 game.attemptGuess()
                 selection = 0
@@ -46,6 +60,7 @@ struct CodeBreakerView: View {
     }
     
     var resetGameButton: some View {
+        
         Button("Reset Game") {
             withAnimation {
                 game.resetGame()
@@ -55,21 +70,7 @@ struct CodeBreakerView: View {
         .font(.system(size: GuessButton.maximumFontSize))
         .minimumScaleFactor(GuessButton.scaleFactor)
     }
-    
-    func view(for code: Code) -> some View {
-        HStack {
-            CodeView(code: code, selection: $selection)
-            Color.clear.aspectRatio(1, contentMode: .fit)
-                .overlay {
-                    if let matches = code.matches {
-                        MatchMarkers(matchs: matches)
-                    }
-                    else if code.kind == .guess {
-                        guessbutton
-                    }
-                }
-        }
-    }
+
     struct GuessButton {
         static let minimumFontSize: CGFloat = 8
         static let maximumFontSize: CGFloat = 80

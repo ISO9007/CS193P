@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS193P 阅读作业 III：Swift 其余大部分内容（中文翻译）</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --stanford-red: #c90025;
+      --rule-blue: #18a6dc;
+      --paper: #fff;
+      --ink: #111;
+      --link: #0000a8;
+      --gray: #b8b8b8;
+      --highlight: #fffbc9;
+      --pink: #ffd6d6;
+      --serif: Baskerville, "Baskerville MT", "Songti SC", STSong, SimSun, serif;
+      --display: "Big Caslon", Baskerville, "Songti SC", STSong, serif;
+      --sans: "Gill Sans", "Gill Sans MT", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: Menlo, Monaco, Consolas, "SFMono-Regular", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      background: #e8eaed;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 20px;
+      line-height: 1.34;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .document { padding: 28px 0 48px; }
+
+    .page {
+      position: relative;
+      width: 816px;
+      height: 1056px;
+      margin: 0 auto 28px;
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 10px 34px rgba(0, 0, 0, .16);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .page:last-child { page-break-after: auto; break-after: auto; }
+
+    .running-head,
+    .running-foot {
+      position: absolute;
+      left: 96px;
+      width: 624px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1px;
+      background: var(--stanford-red);
+      color: #fff;
+      font: 11px/14px var(--sans);
+      text-transform: uppercase;
+      letter-spacing: .005em;
+      white-space: nowrap;
+    }
+
+    .running-head { top: 47px; }
+    .running-foot { bottom: 48px; }
+
+    .content {
+      position: absolute;
+      inset: 94px 96px 78px;
+    }
+
+    .page-title {
+      margin: 22px 0 34px -11px;
+      color: var(--stanford-red);
+      font: 400 58px/1.2 var(--display);
+      letter-spacing: -.035em;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      padding-top: 7px;
+      border-top: 1px dashed var(--rule-blue);
+      color: var(--stanford-red);
+      font: 700 20px/1.15 var(--sans);
+    }
+
+    p { margin: 0 0 19px; }
+
+    a,
+    .link {
+      color: var(--link);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: .82em;
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+
+    strong { font-weight: 700; }
+    em { font-style: italic; }
+
+    .section { margin-bottom: 28px; }
+    .section p { margin-left: 13px; }
+
+    .chapter-title {
+      margin: 0 0 23px;
+      color: var(--stanford-red);
+      font: 700 21px/1.15 var(--sans);
+      border-top: 1px dashed var(--rule-blue);
+      padding-top: 7px;
+    }
+
+    .topic {
+      margin: 0 0 19px;
+      font: 400 26px/1.1 var(--sans);
+    }
+
+    .topic.link { color: var(--link); }
+    .topic.gray { color: var(--gray); }
+    .topic.highlight { display: inline; background: var(--highlight); color: var(--link); }
+
+    .read-list {
+      margin: 13px 0 25px 55px;
+      padding: 0;
+      list-style: none;
+      color: #000;
+      font-family: var(--sans);
+      font-size: 19px;
+      line-height: 1.16;
+    }
+
+    .read-list li { margin: 0; }
+    .read-list .indent { margin-left: 48px; }
+    .read-list .gray { color: var(--gray); }
+    .hl { background: var(--highlight); }
+    .pink { background: var(--pink); }
+
+    .small { font-size: 18px; line-height: 1.29; }
+    .small p { margin-bottom: 16px; }
+    .tight p { margin-bottom: 13px; }
+    .extra-tight p { margin-bottom: 11px; }
+
+    @media (max-width: 840px) {
+      body { overflow-x: auto; }
+      .document { width: 816px; padding: 12px 0 24px; }
+      .page { margin-bottom: 12px; }
+    }
+
+    @page { size: Letter; margin: 0; }
+
+    @media print {
+      body { background: #fff; }
+      .document { padding: 0; }
+      .page { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <article class="page" aria-label="第 1 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h1 class="page-title">阅读作业 III：<br>Swift 其余大部分内容</h1>
+
+        <section class="section">
+          <h2>目标</h2>
+          <p>本周我们要读完这份文档中剩下的重要主题。</p>
+          <p>最值得注意的是错误处理（Error Handling）、并发（Concurrency），以及协议（Protocols）的其余部分。</p>
+        </section>
+
+        <section class="section">
+          <h2>截止时间</h2>
+          <p>你应该在第 11 次课之前完成本次所有阅读。</p>
+        </section>
+
+        <section class="section">
+          <h2>材料</h2>
+          <p>你将继续阅读和上周相同的文档，例如 <a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Swift Programming Language</a>。</p>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 1 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 2 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h2>Swift Programming Language</h2>
+
+        <p>不要略过任何 <code>NOTE</code> 文字（灰色框里的内容），因为其中很多都相当重要。不过，如果某个 <code>NOTE</code> 提到 Objective-C 或 bridging，你可以忽略它。</p>
+        <p>如果正文里有指向其他章节的链接，你不必顺着点过去，除非它链接到的内容也是本周阅读作业的一部分。</p>
+        <p>每个主要章节开头的概述都要读。例如，在 <span class="link">The Basics</span> 中，一定要读以 “Swift provides many fundamental data types ...” 开头的那一段。</p>
+        <p>你已经读完了 <span class="link">A Swift Tour</span> 里除最后两节之外的所有内容。</p>
+        <p>错误处理和并发某种程度上是一组搭档。几周后我们会演示并发。它可能是个不太容易掌握的概念，但很重要，因为我们永远不希望应用的响应性被一些耗时操作阻塞，比如从互联网获取数据。你还会在 Language Guide 的主体章节里更详细地阅读这些内容。</p>
+
+        <ul class="read-list">
+          <li><span class="hl">Concurrency（并发）</span></li>
+          <li><span class="hl">Error Handling（错误处理）</span></li>
+        </ul>
+      </div>
+      <footer class="running-foot"><span>第 2 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 3 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small">
+        <p>在 <span class="link">Language Guide</span> 区域中，请按下面列出的章节与小节阅读。要想继续跟上课堂内容，理解这些小节里的信息非常重要，所以别把这次阅读敷衍过去。</p>
+
+        <h3 class="topic link">The Basics（基础）</h3>
+        <p>不要再拖延学习 Swift 中的错误处理了！</p>
+        <ul class="read-list">
+          <li><span class="hl">Error Handling（错误处理）</span></li>
+          <li>Assertions and Preconditions（断言与前置条件）</li>
+        </ul>
+
+        <h3 class="topic link">Strings and Characters（字符串与字符）</h3>
+        <p>如果你前两次都跳过了这一节，现在必须读了！</p>
+        <ul class="read-list">
+          <li>String Literals（字符串字面量）</li>
+          <li>Initializing an Empty String（初始化空字符串）</li>
+          <li>String Mutability（字符串可变性）</li>
+          <li>Strings Are Value Types（字符串是值类型）</li>
+          <li>Working with Characters（处理字符）</li>
+          <li>Concatenating Strings and Characters（连接字符串和字符）</li>
+          <li><span class="hl">String Interpolation（字符串插值）</span></li>
+          <li>Unicode</li>
+          <li><span class="hl">Counting Characters（计算字符数量）</span></li>
+          <li><span class="pink">Accessing and Modifying a String（访问和修改字符串）</span></li>
+          <li><span class="hl">Substrings（子字符串）</span></li>
+          <li>Comparing Strings（比较字符串）</li>
+          <li class="gray">Unicode Representations of Strings（字符串的 Unicode 表示）</li>
+        </ul>
+
+        <h3 class="topic link">Control Flow（控制流）</h3>
+        <p>一般来说，应尽量避免从循环等结构中强行转移控制流。不过，知道如何检查某个 API 在给定 OS 或版本中的可用性很重要。</p>
+        <ul class="read-list">
+          <li class="gray">Control Transfer Statements（控制转移语句）</li>
+          <li class="gray indent">Continue</li>
+          <li class="gray indent">Labeled Statements（带标签语句）</li>
+          <li>Checking API Availability（检查 API 可用性）</li>
+        </ul>
+      </div>
+      <footer class="running-foot"><span>第 3 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 4 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small tight">
+        <h3 class="topic link">Closures（闭包）</h3>
+        <p>Autoclosures（自动闭包）算是闭包里比较小众的一种语法。知道它是有好处的，不过你不会经常自己写使用 autoclosure 的函数。</p>
+        <ul class="read-list">
+          <li><span class="hl">Autoclosures（自动闭包）</span></li>
+        </ul>
+
+        <h3 class="topic">Enumerations（枚举）</h3>
+        <p>我们大概还是想避免递归枚举，所以本周再次把它留到以后。</p>
+        <ul class="read-list">
+          <li class="gray">Recursive Enumerations（递归枚举）</li>
+        </ul>
+
+        <h3 class="topic link">Properties（属性）</h3>
+        <p>属性观察器很简单（下周课上我们会展示）。另一方面，属性包装器稍微更难理解，但它们非常重要，因为正是这种语言特性支撑了 <code>@State</code>、<code>@Published</code>、<code>@ObservedObject</code> 等东西。尽力理解属性包装器是如何工作的，但不要觉得自己必须已经掌握到能亲手编写属性包装器的程度。</p>
+        <ul class="read-list">
+          <li>Property Observers（属性观察器）</li>
+          <li>Property Wrappers（属性包装器）</li>
+        </ul>
+
+        <h3 class="topic link">Subscripts（下标）</h3>
+        <p>下标常常是一种很干净的语法，可以用来访问集合中的数据，甚至也可以从某个非结构化数据源中按语义取出一个值。话虽如此，在你学习 Swift 的前 10 周里，它大概不是你会经常自己写的东西。请阅读整个小节。</p>
+
+        <h3 class="topic gray">Inheritance（继承）</h3>
+        <p>我们会比较轻描淡写地带过 Swift 中的面向对象编程，因为除了 <code>@Observable</code> 之外，你在 SwiftUI 中不会经常用到它。我们会把这部分阅读放到第 4 次也是最后一次阅读作业里（那一次主要会是一些“偏门知识”）。</p>
+      </div>
+      <footer class="running-foot"><span>第 4 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 5 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small extra-tight">
+        <h3 class="topic link">Initialization（初始化）</h3>
+        <p>同上，关于 OOP 的部分暂时略过。这里我们只读最后一个非面向对象的初始化主题：可失败初始化器。可失败初始化器其实相当常用。基本上，它只是允许某个 <code>init</code> 函数返回一个 Optional；如果无法根据提供的参数初始化这个 struct 或 class，就返回 <code>nil</code>。</p>
+        <ul class="read-list">
+          <li class="gray">Class Inheritance and Initialization（类继承与初始化）</li>
+          <li>Failable Initializers（可失败初始化器）</li>
+          <li class="gray">Required Initializers（必需初始化器）</li>
+        </ul>
+
+        <h3 class="topic gray">Deinitialization（反初始化）</h3>
+        <p>反初始化也是另一个 OOP/引用类型相关主题。</p>
+
+        <h3 class="topic link"><span class="hl">Error Handling（错误处理）</span></h3>
+        <p>理解错误处理很重要，尤其是当你逐步接触 Swift 和 SwiftUI 中更强大的 API 时。事实上，错误处理和并发是本周阅读里最重要的主题。请阅读整个小节。</p>
+
+        <h3 class="topic link"><span class="hl">Concurrency（并发）</span></h3>
+        <p>并发很重要，因为我们不希望轻快灵敏的 UI 被慢吞吞的活动阻塞，例如网络获取、处理大批量机器学习数据，或诸如此类的事情。请阅读整个小节。</p>
+
+        <h3 class="topic gray">Macros（宏）</h3>
+        <p>这一节解释了像 <code>@Observable</code> 这样的东西实际上是如何实现的。现在我们可以先把它们当作“魔法”。我们会把这一节安排到下周。</p>
+
+        <h3 class="topic gray">Type Casting（类型转换）</h3>
+        <p>随着 SwiftUI 完全取代 UIKit 成为人们编写 iOS app 的方式，类型转换变得越来越不必要。所以我们会把这块灰掉，留到最后一次阅读作业。一般来说，一个结构良好的 Swift 应用不应该使用任何类型转换；但偶尔为了和 UIKit 时代的 API 做向后兼容，你还是会看到它。如果你在其他语境中发现自己正在做类型转换，通常会有更好的办法，往往是通过协议和泛型。</p>
+      </div>
+      <footer class="running-foot"><span>第 5 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 6 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small">
+        <h3 class="topic link">Extensions（扩展）</h3>
+        <p>现在你已经读过上面的下标内容了，你大概也能读懂扩展里最后这个还没读过的小节。</p>
+        <ul class="read-list">
+          <li>Subscripts（下标）</li>
+        </ul>
+
+        <h3 class="topic link">Protocols（协议）</h3>
+        <p>补完协议学习，是本次阅读作业中更重要的事项之一。不过，下面那些与 UIKit 向后兼容相关的小节（UIKit 是过去编写 iOS app 的旧方式），我们会留到最后一次阅读作业。</p>
+        <ul class="read-list">
+          <li>Initializer Requirements（初始化器要求）</li>
+          <li>Protocols as Types（作为类型的协议）</li>
+          <li class="gray">Delegation（委托）</li>
+          <li>Collections of Protocol Types（协议类型集合）</li>
+          <li class="gray">Class-Only Protocols（仅限类的协议）</li>
+          <li>Protocol Composition（协议组合）</li>
+          <li>Checking for Protocol Conformance（检查协议遵循）</li>
+          <li class="gray">Optional Protocol Requirements（可选协议要求）</li>
+        </ul>
+
+        <h3 class="topic link">Generics（泛型）</h3>
+        <p>现在你已经完整理解协议了（顺带也理解了下标），你就可以把这一节读完。</p>
+        <ul class="read-list">
+          <li>Associated Types（关联类型）</li>
+          <li>Associated Types with a Generic Where Clause（带泛型 where 子句的关联类型）</li>
+          <li>Generic Subscripts（泛型下标）</li>
+        </ul>
+      </div>
+      <footer class="running-foot"><span>第 6 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 7 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content small tight">
+        <h3 class="topic link"><span class="hl">Opaque and Boxed Protocol Types（这解释了 “some View”）</span></h3>
+        <p>如果你希望在 API 中表达“我要传来传去的东西表现得像某个协议”，但又不想对那个东西施加其他限制，这种能力非常有价值。不透明类型（Opaque types）就允许你这么做。这大概属于“相对高级的函数式程序员会用的工具”这一类；你很可能即使没有完全掌握它，也能正常写 SwiftUI app。但当你在代码中看到 <code>some View</code> 之类的东西时，你至少应该知道发生了什么。</p>
+        <p>理解 <code>some Shape</code> 和 <code>any Shape</code> 之间的区别很重要，所以请认真留意。</p>
+
+        <h3 class="topic gray">Automatic Reference Counting（自动引用计数）</h3>
+        <p>这是引用类型的内存被清理的方式。再说一次，我们主要使用值类型，所以可以把这部分推迟到最后一次阅读作业。</p>
+
+        <h3 class="topic gray">Memory Safety（内存安全）</h3>
+        <p>哎呀，如果你必须关心自己会不会在堆内存里乱踩内存，那你真的已经到达 Swift 风格的外缘了！在正常编写 SwiftUI 应用的过程中，你应该永远不必担心这个。</p>
+
+        <h3 class="topic link">Access Control（访问控制）</h3>
+        <p>我们其实只是为了降低你的阅读负担，才把这部分推迟到现在。注意，在你开始编写自己的模块（Swift 里的说法，也就是代码库）之前，许多访问控制关键字（比如 <code>public</code>）都不会是你会用到的东西。<code>private</code>、<code>private(set)</code>（以及默认的 <code>internal</code>）会是你最常用的访问控制级别。</p>
+        <ul class="read-list">
+          <li>Custom Types（自定义类型）</li>
+          <li class="gray">Subclassing（子类化）</li>
+          <li>Constants, Variables, Properties, and Subscripts（常量、变量、属性和下标）</li>
+          <li>Initializers（初始化器）</li>
+          <li>Protocols（协议）</li>
+          <li>Extensions（扩展）</li>
+          <li>Generics（泛型）</li>
+          <li>Type Aliases（类型别名）</li>
+        </ul>
+      </div>
+      <footer class="running-foot"><span>第 7 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 8 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h2>Swift API Guidelines</h2>
+
+        <p>请完整阅读这份 <span class="link">Swift API Guidelines</span> 文档。</p>
+        <p>本周请<strong>再次</strong>读一遍。现在你应该已经完全掌握这些信息。随着这个季度继续推进，你最终应该成为属性、方法以及其他 Swift 构造的<em>命名专家</em>。这会要求你经常回到这份文档中查阅。</p>
+        <p>凡是写着 “MORE DETAIL” 的地方，一定都要点开。</p>
+        <p>请特别关注 “Write a documentation comment”（编写文档注释）这一节。</p>
+        <p>请特别关注 “Follow case conventions”（遵循大小写约定）这一节。</p>
+        <p>请特别关注整个 “Argument Labels”（参数标签）部分。</p>
+        <p>你也可以忽略最后一节的最后一个小节：“Special Instructions -> Take extra care with unconstrained polymorphism”。我们不会用 <code>Any</code> 和 <code>AnyObject</code> 类型做任何事情。</p>
+      </div>
+      <footer class="running-foot"><span>第 8 页，共 8 页</span><span>阅读作业 III：Swift 其余大部分内容</span></footer>
+    </article>
+  </main>
+</body>
+</html>
