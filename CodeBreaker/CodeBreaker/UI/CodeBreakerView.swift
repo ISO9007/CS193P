@@ -26,8 +26,9 @@ struct CodeBreakerView: View {
                         Button("Guess", action: guess).fixeibleSystemFont()
                     }
                     .animation(nil, value: game.attempts.count)
-                    .opacity(restarting ? 0 : 1)
+                    .opacity(restarting && game.isOver ? 0 : 1)
                 }
+                
                 
                 ForEach(game.attempts.indices.reversed(), id: \.self) { index in
                     CodeView(code: game.attempts[index]) {

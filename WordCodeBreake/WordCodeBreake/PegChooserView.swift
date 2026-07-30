@@ -16,21 +16,15 @@ struct PegChooserView: View {
     let pegChooserMatch: [String: Match]
     
     var body: some View {
-        VStack(alignment: .center) {
-            HStack {
-                Spacer()
-                Button("Guess") {
-                    onGuessClick?()
-                }
-                Button("backspace") {
-                    onBackspace?()
-                }
+        VStack {
+            optionButton
+            VStack(alignment: .center) {
+                keywordView(layoutStart: 0, layoutEnd: 10)
+                keywordView(layoutStart: 10, layoutEnd: 10 + 9)
+                keywordView(layoutStart: 10 + 9, layoutEnd: choices.count)
             }
-            keywordView(layoutStart: 0, layoutEnd: 10)
-            keywordView(layoutStart: 10, layoutEnd: 10 + 9)
-            keywordView(layoutStart: 10 + 9, layoutEnd: choices.count)
+            .aspectRatio(10 / 3, contentMode: .fit)
         }
-        .aspectRatio(10 / 4, contentMode: .fit)
     }
     
     func keywordView(layoutStart: Int, layoutEnd: Int) -> some View {
@@ -43,6 +37,18 @@ struct PegChooserView: View {
                     PegView(peg: choices[index], pegMatch: pegChooserMatch[peg, default: .nomatch])
                         .foregroundStyle(.black)
                 }
+            }
+        }
+    }
+    
+    var optionButton: some View {
+        HStack {
+            Spacer()
+            Button("Guess") {
+                onGuessClick?()
+            }
+            Button("backspace") {
+                onBackspace?()
             }
         }
     }
