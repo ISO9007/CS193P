@@ -13,11 +13,11 @@ struct CodeView<AncillaryView>: View where AncillaryView: View {
     let code: Code
     // MARK: Data
     @Binding var selection: Int
+    // MARK: Data Owned by me
+    @Namespace private var selectionNamespace
 
     @ViewBuilder
     let ancillaryView: () -> AncillaryView
-    // 动画几何匹配namespace
-    @Namespace private var bgNamespece
     
     // 函数一定要加 @ViewBuilder,不然编译器识别不了.
     init(code: Code, selection: Binding<Int> = .constant(-1), @ViewBuilder ancillaryView: @escaping () -> AncillaryView = { EmptyView() }) {
@@ -33,17 +33,26 @@ struct CodeView<AncillaryView>: View where AncillaryView: View {
             ForEach(code.pegs.indices, id: \.self) { index in
                 PegView(peg: code.pegs[index])
                     .padding(Selection.border)
-                    .background {
-                        if code.kind == .guess, selection == index {
-                            Selection.shape
-                                .foregroundStyle(Selection.color)
-//                                .transition(.asymmetric(insertion: .opacity, removal: .move(edge: .bottom)))
-                                .matchedGeometryEffect(id: "bg", in: bgNamespece, properties: .position)
+                    .background {// selection backgroud
+                        Group {
+                            if code.kind == .guess, selection == index {
+                                Selection.shape
+                                    .foregroundStyle(Selection.color)
+                                    .matchedGeometryEffect(id: "selection", in: selectionNamespace)
+                            }
                         }
+                        .animation(.selection, value: selection)
                     }
-                    .animation(.easeInOut(duration: 0.3), value: selection)
-                    .overlay(
+                    .overlay( // hidden code obscuring
                         Selection.shape.foregroundStyle(code.isHidden ? Color.gray : Color.clear)
+                            .transaction({ transaction in
+                                // 盖住谜底code不用动画
+                                if code.isHidden {
+                                    transaction.animation = .none
+                                }
+                            })
+//                            .animation(nil, value: code.isHidden)
+                            
                     )
                     .onTapGesture {
                         if code.kind == .guess {
