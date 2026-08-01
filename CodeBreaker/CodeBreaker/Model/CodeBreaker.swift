@@ -14,6 +14,8 @@ struct CodeBreaker {
     var guess: Code = Code(kind: .guess)
     var attempts: [Code] = []
     let pegsChoise: [Peg]
+    var startTime: Date = .now
+    var endTime: Date?
     
     init(pegsChoise: [Peg] = [.red, .yellow, .blue, .green]) {
         self.pegsChoise = pegsChoise
@@ -29,6 +31,7 @@ struct CodeBreaker {
         guess.pegs[index] = peg
     }
     
+    // 暂时没用,自动获取下一个Peg
     mutating func changeGuessPeg(_ index: Int) {
         let existingPeg = guess.pegs[index]
         if let indexOfExistingPegsChoise = pegsChoise.firstIndex(of: existingPeg) {
@@ -47,6 +50,7 @@ struct CodeBreaker {
         attempts.append(guessCode)
         guess.reset()
         if isOver {
+            endTime = .now
             masterCode.kind = .master(isHidden: false)
         }
     }
@@ -56,10 +60,10 @@ struct CodeBreaker {
         masterCode.randomize(from: pegsChoise)
         guess.reset()
         attempts.removeAll()
+        startTime = .now
+        endTime = nil
     }
 }
-
-
 
 
 

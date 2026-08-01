@@ -19,14 +19,19 @@ struct CodeBreakerView: View {
         VStack {
             Button("Restart", systemImage: "arrow.circlepath",action: restart)
                 .labelStyle(.automatic)// Button标题或图标显示样式, 默认是automatic
-            CodeView(code: game.masterCode)
+            CodeView(code: game.masterCode) {
+                ElapsedTimeView(startTime: game.startTime, endTime: game.endTime)
+                    .fixeibleSystemFont()
+                    .monospaced() // 等宽
+                    .lineLimit(1) // 限制一行, 只等宽文本会换行.
+            }
             ScrollView {
                 if !game.isOver || restarting {
                     CodeView(code: game.guess, selection: $selection) {
                         Button("Guess", action: guess).fixeibleSystemFont()
                     }
                     .animation(nil, value: game.attempts.count)
-                    .opacity(restarting && game.isOver ? 0 : 1)
+                    .opacity(restarting ? 0 : 1)
                 }
                 
                 
@@ -56,11 +61,11 @@ struct CodeBreakerView: View {
     
     func restart() {
         withAnimation(.restart) {
-            restarting = true
+            restarting = game.isOver
+            game.restart()
+            selection = 0
         } completion: {
             withAnimation(.restart) {
-                game.restart()
-                selection = 0
                 restarting = false
             }
         }

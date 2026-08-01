@@ -14,7 +14,6 @@ struct Code {
     var pegs: [Peg] = Array(repeating: Peg.pegMissing, count: 4)
     var kind: Kind
     
-    
     enum Kind: Equatable {
         case master(isHidden: Bool)
         case guess
@@ -70,4 +69,6 @@ struct Code {
         }
         return result
     }
+    
+    
 }

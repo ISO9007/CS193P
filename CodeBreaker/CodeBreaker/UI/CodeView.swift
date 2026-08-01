@@ -29,6 +29,7 @@ struct CodeView<AncillaryView>: View where AncillaryView: View {
     
     // MARK: - body
     var body: some View {
+        
         HStack {
             ForEach(code.pegs.indices, id: \.self) { index in
                 PegView(peg: code.pegs[index])
@@ -77,4 +78,9 @@ fileprivate struct Selection {
     static let cornerRadiues: CGFloat = 10
     static let color: Color = Color.gray(brightness: 0.85)
     static let shape = RoundedRectangle(cornerRadius: Selection.cornerRadiues, style: .continuous)
+}
+
+
+struct dd: Equatable{
+    
 }

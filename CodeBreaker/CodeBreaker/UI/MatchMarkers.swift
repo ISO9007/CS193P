@@ -63,4 +63,12 @@ struct MatchMarkers: View {
     MatchMarkers(matchs: [.exact, .exact, .inexact, .nomatch, .exact, .exact])
 }
 
+struct HH: Hashable {
+    let name: String
+    let age: Int
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(age)
+    }
+}
 
