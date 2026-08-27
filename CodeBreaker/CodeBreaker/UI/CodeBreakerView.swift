@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct CodeBreakerView: View {
+    
+    // MARK: Shared data With me
+    @Binding var game: CodeBreaker
+    
     // MARK: Data Owned by me
-    @State private var game = CodeBreaker(pegsChoise: [.yellow, .gray, .black, .brown, .orange])
     @State private var selection: Int = 0
     @State private var restarting = false
     @State private var hideMostRecentMarker = false
@@ -17,28 +20,21 @@ struct CodeBreakerView: View {
     // MARK: - body
     var body: some View {
         VStack {
-            Button("Restart", systemImage: "arrow.circlepath",action: restart)
-                .labelStyle(.automatic)// Button标题或图标显示样式, 默认是automatic
-            CodeView(code: game.masterCode) {
-                ElapsedTimeView(startTime: game.startTime, endTime: game.endTime)
-                    .fixeibleSystemFont()
-                    .monospaced() // 等宽
-                    .lineLimit(1) // 限制一行, 只等宽文本会换行.
-            }
+            CodeView(code: game.masterCode)
             ScrollView {
-                if !game.isOver || restarting {
+                if !game.isOver {
                     CodeView(code: game.guess, selection: $selection) {
                         Button("Guess", action: guess).fixeibleSystemFont()
                     }
                     .animation(nil, value: game.attempts.count)
                     .opacity(restarting ? 0 : 1)
+                    
                 }
                 
-                
-                ForEach(game.attempts.indices.reversed(), id: \.self) { index in
-                    CodeView(code: game.attempts[index]) {
-                        let showMarker = !hideMostRecentMarker || index != game.attempts.count - 1
-                        if showMarker, let matches = game.attempts[index].matches {
+                ForEach(game.attempts, id: \.pegs) { attempt in
+                    CodeView(code: attempt) {
+                        let showMarker = !hideMostRecentMarker || attempt.pegs != game.attempts.first?.pegs
+                        if showMarker, let matches = attempt.matches {
                             MatchMarkers(matchs: matches)
                         }
                     }
@@ -52,6 +48,17 @@ struct CodeBreakerView: View {
             }
         }
         .padding()
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Restart", systemImage: "arrow.circlepath",action: restart)
+                    .labelStyle(.automatic)// Button标题或图标显示样式, 默认是automatic
+            }
+            ToolbarItem {
+                ElapsedTimeView(startTime: game.startTime, endTime: game.endTime)
+                    .monospaced() // 等宽
+                    .lineLimit(1) // 限制一行, 只有等宽文本会换行.
+            }
+        }
     }
     
     func changePegAtSelection(peg: Peg) {
@@ -86,5 +93,8 @@ struct CodeBreakerView: View {
 }
 
 #Preview {
-    CodeBreakerView()
+    @Previewable @State var game = CodeBreaker(name: "Preview", pegsChoise: [.red, .blue, .orange])
+    NavigationStack {
+        CodeBreakerView(game: $game)
+    }
 }

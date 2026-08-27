@@ -10,6 +10,7 @@ import SwiftUI
 
 // 密码
 struct Code {
+    
     // MARK: Data in
     var pegs: [Peg] = Array(repeating: Peg.pegMissing, count: 4)
     var kind: Kind
@@ -33,7 +34,7 @@ struct Code {
         for index in pegs.indices {
             pegs[index] = pegChoise.randomElement() ?? Peg.pegMissing
         }
-        print(self)
+        print(pegs)
     }
     
     mutating func reset() {

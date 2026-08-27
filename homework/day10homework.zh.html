@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS193P 作业 IV：CodeWord Breaker 历史记录（中文翻译）</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --stanford-red: #c90025;
+      --rule-blue: #1aa8df;
+      --paper: #fff;
+      --ink: #111;
+      --serif: Baskerville, "Baskerville MT", "Songti SC", STSong, SimSun, serif;
+      --display: "Big Caslon", Baskerville, "Songti SC", STSong, serif;
+      --sans: "Gill Sans", "Gill Sans MT", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --mono: Menlo, Monaco, Consolas, "SFMono-Regular", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      background: #e8eaed;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 20px;
+      line-height: 1.31;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .document { padding: 28px 0 48px; }
+
+    .page {
+      position: relative;
+      width: 816px;
+      height: 1056px;
+      margin: 0 auto 28px;
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 10px 34px rgba(0, 0, 0, .16);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .page:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    .running-head,
+    .running-foot {
+      position: absolute;
+      left: 96px;
+      width: 624px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1px;
+      background: var(--stanford-red);
+      color: #fff;
+      font: 11px/14px var(--sans);
+      letter-spacing: .005em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .running-head { top: 47px; }
+    .running-foot { bottom: 48px; }
+
+    .content {
+      position: absolute;
+      inset: 94px 96px 78px;
+    }
+
+    .page-title {
+      margin: 30px 0 36px -12px;
+      color: var(--stanford-red);
+      font: 400 50px/1.42 var(--display);
+      letter-spacing: -.038em;
+    }
+
+    .page-title .line {
+      display: block;
+      white-space: nowrap;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      padding-top: 7px;
+      border-top: 1px dashed var(--rule-blue);
+      color: var(--stanford-red);
+      font: 700 20px/1.15 var(--sans);
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section p {
+      margin-left: 13px;
+    }
+
+    .rule-bottom {
+      padding-bottom: 28px;
+      border-bottom: 1px dashed var(--rule-blue);
+    }
+
+    strong { font-family: var(--serif); font-weight: 700; }
+    em { font-style: italic; }
+
+    code {
+      font-family: var(--mono);
+      font-size: .78em;
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+
+    .tasks,
+    .hints,
+    .challenge {
+      margin: 0;
+      padding: 0 0 0 0;
+      list-style: none;
+      counter-reset: item;
+    }
+
+    .tasks > li,
+    .hints > li,
+    .challenge > li {
+      position: relative;
+      margin: 0 0 13px 35px;
+      counter-increment: item;
+    }
+
+    .tasks > li::before,
+    .hints > li::before,
+    .challenge > li::before {
+      content: counter(item) ".";
+      position: absolute;
+      left: -35px;
+      width: 24px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tasks {
+      font-size: 19.4px;
+      line-height: 1.23;
+    }
+
+    .tasks > li { margin-bottom: 12px; }
+
+    .hints {
+      font-size: 18.6px;
+      line-height: 1.19;
+    }
+
+    .hints > li {
+      margin-left: 31px;
+      margin-bottom: 12px;
+    }
+
+    .hints > li::before { left: -31px; }
+
+    .evaluation-copy {
+      margin-left: 13px;
+    }
+
+    .bullets {
+      margin: 10px 0 14px 50px;
+      padding: 0;
+      list-style: none;
+      font-size: 19.5px;
+      line-height: 1.28;
+    }
+
+    .bullets li {
+      position: relative;
+      margin: 0 0 10px;
+    }
+
+    .bullets li::before {
+      content: "•";
+      position: absolute;
+      left: -25px;
+      top: -1px;
+      color: var(--stanford-red);
+      font-family: var(--sans);
+      font-weight: 700;
+    }
+
+    .challenge {
+      font-size: 18.8px;
+      line-height: 1.25;
+    }
+
+    .challenge > li {
+      margin-left: 31px;
+      margin-bottom: 12px;
+    }
+
+    .challenge > li::before { left: -31px; }
+
+    .pt {
+      margin-right: .15em;
+      white-space: nowrap;
+    }
+
+    .compact { font-size: 18.8px; line-height: 1.25; }
+    .compact p { margin-bottom: 12px; }
+
+    @media (max-width: 840px) {
+      body { overflow-x: auto; }
+      .document { width: 816px; padding: 12px 0 24px; }
+      .page { margin-bottom: 12px; }
+    }
+
+    @page { size: Letter; margin: 0; }
+
+    @media print {
+      body { background: #fff; }
+      .document { padding: 0; }
+      .page {
+        margin: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <article class="page" aria-label="第 1 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h1 class="page-title">
+          <span class="line">作业 IV：</span>
+          <span class="line">CodeWord Breaker 历史记录</span>
+        </h1>
+
+        <section class="section">
+          <h2>目标</h2>
+          <p>本周你将增强现有的 CodeWord Breaker 应用，让它记住你玩过的所有游戏（好吧，本周它只会记到你重启应用为止 - 下周我们会让它永久记住）。你还会把应用做成多平台，并为它添加一些设置。</p>
+          <p>一定要查看下面的“提示”部分！</p>
+        </section>
+
+        <section class="section">
+          <h2>截止时间</h2>
+          <p>本次作业需在第 13 次课开始之前完成。</p>
+        </section>
+
+        <section class="section rule-bottom">
+          <h2>材料</h2>
+          <p>你将直接基于作业 3 的代码继续构建。</p>
+          <p>和往常一样，欢迎你使用课堂上的任何代码。</p>
+          <p>如果需要，你可以使用互联网（AI 或其他任何东西）来弄清问题；但如果你这么做，必须在对应代码的注释中注明来源。对于必做任务，你<strong>不应该需要这样做</strong>。不过，挑战模式可能就是另一回事了。</p>
+        </section>
+      </div>
+      <footer class="running-foot"><span>第 1 页，共 5 页</span><span>作业 IV：WORD CODE BREAKER 历史记录</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 2 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h2>必做任务</h2>
+        <ol class="tasks">
+          <li>你现有的 A3 CodeWord Breaker 游戏 View 必须继续正常工作，并满足 A3 的所有必做任务；唯一例外是：<strong>不再允许重新开始同一局游戏</strong>。</li>
+          <li>你的 CodeWord Breaker 应用主 View（也就是在 <code>@main</code> 代码中指定的那个）现在应该显示一个 <code>List</code>，列出用户曾经玩过的所有游戏。每次启动应用时，这个列表一开始会是空的（除非你做了某个挑战模式），但会随着用户玩更多游戏而增长。</li>
+          <li><code>List</code> 中的游戏必须排序，最近玩过的游戏（也就是最近一次进行了尝试的游戏）排在列表最前面。</li>
+          <li><code>List</code> 中每个游戏应显示该游戏中<strong>最后一次尝试的单词，以及它正确的 peg 匹配指示</strong>；理想情况下，看起来应和这次尝试在游戏进行时的样子完全一致。</li>
+          <li><code>List</code> 中那些还没有任何尝试的游戏（新创建的游戏）应显示空白 peg、被“遮挡”的 peg，或类似的东西，用来表示尚未做出任何尝试。</li>
+          <li>游戏 <code>List</code> 还应该为每个游戏显示目前已经尝试过的次数。</li>
+          <li>点击 <code>List</code> 中的某个游戏，必须导航到一个 View，让用户可以继续玩这局游戏（也就是使用你在 A3 中写的 View）。如果游戏已经结束，这个 View 应该只显示游戏结束时的状态。</li>
+          <li>你的应用中必须有某种方式可以开始一局新游戏。</li>
+          <li>你可以限制应用只玩长度为 5 个字母的单词，但关于这一点，请查看挑战模式中的更多说明。</li>
+          <li>你的应用应能在 iPhone、iPad 和 Mac（Designed for iPad）上运行。在 iPad 上，游戏列表和当前正在进行的游戏应该能够同时显示在屏幕上。</li>
+          <li>为你的应用支持一些“设置”。示例见“提示”。如果你愿意，可以把这个必做任务推迟到作业 5（因为直到第 12 次课我们才讲到弹出 sheet 之类的内容）。</li>
+          <li>你的 Model 必须使用一个 <code>@Observable</code> class。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 2 页，共 5 页</span><span>作业 IV：WORD CODE BREAKER 历史记录</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 3 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h2>提示</h2>
+        <ol class="hints">
+          <li>本周提示更少了。是时候开始学会在没有任何“助推器”的情况下自己把事情弄明白了。</li>
+          <li>这个提示只是再次说明：所有必做任务都应该只用你在课堂上学过的内容完成。如果你在某个时刻觉得自己需要 AI 或互联网搜索才能完成必做任务，你可能有点偏离路线了。另一方面，有些挑战模式是明确要求你走出课堂所学范围的。在这种情况下，互联网资源（以及 Xcode 中的文档）可能会很有价值。别忘了注明你使用的资源。</li>
+          <li>一定要思考代码复用，尤其是必做任务 4。</li>
+          <li>这里有一些最后一个必做任务可用的“设置”示例（注意这是提示，不是必做任务）。也许用户可以选择 <code>.exact</code> 匹配 peg、<code>.inexact</code> 匹配 peg 和 <code>.none</code> 匹配 peg 的颜色？或者选择 peg 是圆形、圆角矩形，还是类似形状？如果你允许使用 3、4、5 或 6 个字母的单词进行游戏（见下面的挑战模式），也许可以让用户选择默认单词长度？这一项可以玩得开心一点。</li>
+          <li>调出设置 UI 最简单的方式，大概是在主选择器 View 上方的工具栏中放一个“齿轮”图标。设置这个必做任务的重点，是向我们展示你知道如何像课堂中那样弹出一个 sheet，其中包含一个装满控件的 <code>Form</code>。</li>
+          <li>你可能会非常想弄清楚如何让游戏在应用多次启动之间持久保存。就算你这么做，我们当然也不会怪你；不过，我们会在作业 5 中用一种特定方式来做这件事（而那种方式你现在还不知道），所以你大概会想等到那时再加入这个功能。</li>
+          <li>你很可能会发现自己想在许多 View 之间共享“设置”（例如负责设置这些设置的 View，以及所有使用这些设置的 View）。实现这种共享的一种方式，是像 <code>Words.swift</code> 在所有 View 中共享单词字典那样使用 <code>@Environment var</code>。你可以把设置放进一个 <code>@Observable</code> class（这个 class 不属于你的 Model，因为这些很可能主要是 UI 设置，而且 <code>@Observable</code> 也完全可以在 UI 代码中使用），然后在 <code>EnvironmentValues</code> 中创建一个 <code>@Entry</code>，用来保存这个 class 的实例；之后整个 UI 就可以通过 <code>@Environment</code> 使用它。你大概会想像 <code>Words.swift</code> 那样，在它自身上创建一个 <code>static let shared</code>，并把它用作这个 <code>@Entry</code> 的默认值。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 3 页，共 5 页</span><span>作业 IV：WORD CODE BREAKER 历史记录</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 4 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content">
+        <h2>评估</h2>
+        <div class="evaluation-copy">
+          <p>在本季度所有作业中，目标都是写出高质量代码：它能在没有警告或错误的情况下构建，然后测试生成的应用，并持续迭代，直到它能正常运行。</p>
+          <p>下面是作业最常被扣分的原因：</p>
+          <ul class="bullets">
+            <li>项目无法构建。</li>
+            <li>必做任务部分中的一个或多个条目没有满足。</li>
+            <li>没有理解某个基础概念。</li>
+            <li>项目无法在没有警告的情况下构建。</li>
+            <li>代码在视觉上潦草、难以阅读，例如缩进不一致等。</li>
+            <li>由于缺少注释、变量/方法命名不佳、解决方案结构不好、方法过长等原因，你的解决方案会让读代码的人难以理解，甚至无法理解。</li>
+          </ul>
+          <p>学生经常会问：“我的代码到底需要写多少注释？”答案是：你的代码必须能让任何阅读它的人轻松且完整地理解。你可以假设读者了解 iOS API，也知道课堂中 CodeBreaker 游戏代码是如何工作的；但不应该假设他们已经知道你（或任何人）对本次作业的解决方案。</p>
+        </div>
+      </div>
+      <footer class="running-foot"><span>第 4 页，共 5 页</span><span>作业 IV：WORD CODE BREAKER 历史记录</span></footer>
+    </article>
+
+    <article class="page" aria-label="第 5 页">
+      <header class="running-head"><span>CS193P IOS 应用开发</span><span>2025 年春季</span></header>
+      <div class="content compact">
+        <h2>挑战模式</h2>
+        <p>挑战模式是一个机会，让你扩展本周所学，并用更困难的练习推动自己。强烈建议每周尝试其中一个或多个，以便最大化地从这门课中获益。</p>
+        <ol class="challenge">
+          <li><span class="pt">1 分。</span>在应用启动时，用几个处于不同完成阶段的示例游戏预先加载你的游戏列表，用于测试目的。你必须思考如何在代码中表示这些示例游戏。实现方式有非常非常多种。</li>
+          <li><span class="pt">1 分。</span>在游戏进行 UI 中的某个位置显示每局游戏目前已经花了多长时间。它应该只显示用户真正把那局游戏放在屏幕前游玩时花费的总时间。这需要加入类似课堂上添加过的 elapsed time 功能。</li>
+          <li><span class="pt">1 分。</span>也在游戏列表中显示每局游戏目前已经花了多长时间。除非相关游戏也正在屏幕上显示，否则这个时间不应该持续“跳动”。</li>
+          <li><span class="pt">1 分。</span>支持从游戏列表中删除游戏。</li>
+          <li><span class="pt">1 分。</span>当用户创建新游戏时，让用户选择要玩 3、4、5 还是 6 个字母的单词，而不只是 5 个字母。你必须想出一种方式，在用户每次想开始新游戏时询问他们这里想要什么。可以默认成某个值，例如在“设置”中设定的单词长度，或用户上一次玩的长度；但随后需要提供某种替代 UI 来选择不同长度。<code>contextMenu</code> 在这里可能有价值？或者也许你能弄明白如何使用 <code>confirmationDialog</code>？</li>
+          <li><span class="pt">1 分。</span>让你的“设置”在应用多次启动之间保持持久。查看文档中的 <code>UserDefaults</code>，它可以作为存储设置这类内容的一种方式。</li>
+        </ol>
+      </div>
+      <footer class="running-foot"><span>第 5 页，共 5 页</span><span>作业 IV：WORD CODE BREAKER 历史记录</span></footer>
+    </article>
+  </main>
+</body>
+</html>

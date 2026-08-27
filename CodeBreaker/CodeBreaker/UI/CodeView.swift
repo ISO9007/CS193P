@@ -79,8 +79,3 @@ fileprivate struct Selection {
     static let color: Color = Color.gray(brightness: 0.85)
     static let shape = RoundedRectangle(cornerRadius: Selection.cornerRadiues, style: .continuous)
 }
-
-
-struct dd: Equatable{
-    
-}

@@ -10,6 +10,8 @@ import SwiftUI
 
 // 游戏逻辑模型
 struct CodeBreaker {
+    
+    let name: String
     var masterCode: Code = Code(kind: .master(isHidden: true))
     var guess: Code = Code(kind: .guess)
     var attempts: [Code] = []
@@ -17,13 +19,14 @@ struct CodeBreaker {
     var startTime: Date = .now
     var endTime: Date?
     
-    init(pegsChoise: [Peg] = [.red, .yellow, .blue, .green]) {
+    init(name: String, pegsChoise: [Peg] = [.red, .yellow, .blue, .green]) {
+        self.name = name
         self.pegsChoise = pegsChoise
         masterCode.randomize(from: pegsChoise)
     }
     
     var isOver: Bool {
-        attempts.last?.pegs == masterCode.pegs
+        attempts.first?.pegs == masterCode.pegs
     }
 
     mutating func setGuessPeg(peg: Peg, at index: Int) {
@@ -47,7 +50,7 @@ struct CodeBreaker {
             return
         }
         guessCode.kind = .attempt(guessCode.match(against: masterCode))
-        attempts.append(guessCode)
+        attempts.insert(guessCode, at: 0)
         guess.reset()
         if isOver {
             endTime = .now
