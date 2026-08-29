@@ -13,18 +13,39 @@ struct GameChooser: View {
     
     var body: some View {
         NavigationStack {
-            List($games, id: \.pegsChoise, editActions: [.delete, .move]) { $game in
-                // 点击导航跳转
-                NavigationLink {
-                    CodeBreakerView(game: $game)
-                } label: {
-                    GameSummary(game: game)
+            List {
+                ForEach(games) { game in
+                    // 点击导航跳转
+//                    NavigationLink {
+//                        CodeBreakerView(game: game)
+//                    } label: {
+//                        GameSummary(game: game)
+//                    }
+                    
+                    NavigationLink(value: game) {
+                        GameSummary(game: game)
+                    }
+                    NavigationLink(value: game.masterCode.pegs) {
+                        Text("Cheap")
+                    }
+                }
+                .onDelete { offsets in
+                    games.remove(atOffsets: offsets)
+                }
+                .onMove { offset, destination in
+                    games.move(fromOffsets: offset, toOffset: destination)
                 }
             }
             .listStyle(.plain)
             .toolbar {
                 // 导航栏按钮
                 EditButton()
+            }
+            .navigationDestination(for: CodeBreaker.self) { game in
+                CodeBreakerView(game: game)
+            }
+            .navigationDestination(for: [Peg].self) { mastPeg in
+                PegChooser(choise: mastPeg)
             }
         }
         .onAppear {

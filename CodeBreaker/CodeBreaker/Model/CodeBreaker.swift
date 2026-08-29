@@ -9,7 +9,7 @@ import SwiftUI
 
 
 // 游戏逻辑模型
-struct CodeBreaker {
+@Observable class CodeBreaker: Identifiable {
     
     let name: String
     var masterCode: Code = Code(kind: .master(isHidden: true))
@@ -29,13 +29,13 @@ struct CodeBreaker {
         attempts.first?.pegs == masterCode.pegs
     }
 
-    mutating func setGuessPeg(peg: Peg, at index: Int) {
+    func setGuessPeg(peg: Peg, at index: Int) {
         guard guess.pegs.indices.contains(index) else { return }
         guess.pegs[index] = peg
     }
     
     // 暂时没用,自动获取下一个Peg
-    mutating func changeGuessPeg(_ index: Int) {
+    func changeGuessPeg(_ index: Int) {
         let existingPeg = guess.pegs[index]
         if let indexOfExistingPegsChoise = pegsChoise.firstIndex(of: existingPeg) {
             guess.pegs[index] = pegsChoise[(indexOfExistingPegsChoise + 1) % pegsChoise.count]
@@ -44,7 +44,7 @@ struct CodeBreaker {
         }
     }
     
-    mutating func attemptGuess() {
+    func attemptGuess() {
         var guessCode = guess
         if guessCode.pegs.contains(Peg.pegMissing) || attempts.contains(where: { $0.pegs == guessCode.pegs })  {
             return
@@ -58,7 +58,7 @@ struct CodeBreaker {
         }
     }
     
-    mutating func restart() {
+    func restart() {
         masterCode = Code(kind: .master(isHidden: true))
         masterCode.randomize(from: pegsChoise)
         guess.reset()
@@ -67,6 +67,14 @@ struct CodeBreaker {
         endTime = nil
     }
 }
-
+extension CodeBreaker: Hashable {
+    static func == (lst: CodeBreaker, rst: CodeBreaker) -> Bool {
+        lst.id == rst.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
 
 
