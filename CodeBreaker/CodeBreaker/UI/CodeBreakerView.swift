@@ -19,6 +19,14 @@ struct CodeBreakerView: View {
     
     // MARK: - body
     var body: some View {
+        TextField("", text: .constant(""))
+            .autocapitalization(.allCharacters)
+            .textInputAutocapitalization(.characters)
+            .autocorrectionDisabled(false)
+            .onSubmit {
+                
+            }
+            
         VStack {
             CodeView(code: game.masterCode)
             ScrollView {
@@ -45,6 +53,7 @@ struct CodeBreakerView: View {
             if !game.isOver {
                 PegChooser(choise: game.pegsChoise, onChoose: changePegAtSelection)
                     .transition(.pegChooser)
+                    .frame(maxHeight: 100)
             }
         }
         .padding()

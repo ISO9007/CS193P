@@ -11,11 +11,11 @@ import SwiftUI
 // 游戏逻辑模型
 @Observable class CodeBreaker: Identifiable {
     
-    let name: String
+    var name: String
     var masterCode: Code = Code(kind: .master(isHidden: true))
     var guess: Code = Code(kind: .guess)
     var attempts: [Code] = []
-    let pegsChoise: [Peg]
+    var pegsChoise: [Peg]
     var startTime: Date = .now
     var endTime: Date?
     
