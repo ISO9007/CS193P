@@ -16,8 +16,9 @@ import SwiftUI
     var guess: Code = Code(kind: .guess)
     var attempts: [Code] = []
     var pegsChoise: [Peg]
-    var startTime: Date = .now
+    var startTime: Date?
     var endTime: Date?
+    var elapsedTime: TimeInterval = 0
     
     init(name: String, pegsChoise: [Peg] = [.red, .yellow, .blue, .green]) {
         self.name = name
@@ -27,6 +28,19 @@ import SwiftUI
     
     var isOver: Bool {
         attempts.first?.pegs == masterCode.pegs
+    }
+    
+    func elapsedTimeStart() {
+        if startTime == nil, !isOver {
+            startTime = .now
+        }
+    }
+    
+    func elapsedTimePause() {
+        if let startTime {
+            elapsedTime += Date.now.timeIntervalSince(startTime)
+        }
+        startTime = nil
     }
 
     func setGuessPeg(peg: Peg, at index: Int) {
@@ -55,6 +69,7 @@ import SwiftUI
         if isOver {
             endTime = .now
             masterCode.kind = .master(isHidden: false)
+            elapsedTimePause()
         }
     }
     
@@ -65,6 +80,7 @@ import SwiftUI
         attempts.removeAll()
         startTime = .now
         endTime = nil
+        elapsedTime = 0
     }
 }
 extension CodeBreaker: Hashable {

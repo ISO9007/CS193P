@@ -14,6 +14,8 @@ struct GameList: View {
     // MARK: Data Owned by me
     @State private var games: [CodeBreaker] = []
     
+    @State private var gameToEdit: CodeBreaker?
+    
     var body: some View {
         List(selection: $selection) {
             ForEach(games) { game in
@@ -22,7 +24,11 @@ struct GameList: View {
                     GameSummary(game: game)
                 }
                 .contextMenu {
+                    editButton(for: game)
                     deleteButton(game: game)
+                }
+                .swipeActions(edge: .leading) {
+                    editButton(for: game).tint(Color.accentColor)
                 }
     
             }
@@ -37,21 +43,65 @@ struct GameList: View {
         .listStyle(.plain)
         .toolbar {
             // 新增游戏
-            Button("Add game", systemImage: "plus") {
-                withAnimation {
-                    let newGame = CodeBreaker(name: "untitled", pegsChoise: [.red, .brown])
-                    games.append(newGame)
-                }
-            }
+            addButton
             // 导航栏按钮
             EditButton()
         }
-        .onChange(of: games) { oldValue, newValue in
-            if let selection, !newValue.contains(selection) {
+        .onChange(of: games) {
+            if let selection, !games.contains(selection) {
                 self.selection = nil
             }
         }
         .onAppear { addSamplesGame() }
+    }
+    
+    var addButton: some View {
+        Button("Add game", systemImage: "plus") {
+            gameToEdit = CodeBreaker(name: "untitled", pegsChoise: [.red, .brown])
+        }
+//        .onChange(of: gameToEdit) {
+//            showGameEdit = gameToEdit != nil
+//        }
+        .sheet(isPresented: showGameEdit) {
+            gameEditor
+        }
+    }
+    
+    // 利用Binding将触发sheet的变量状态和gameToEit状态互相绑定
+    var showGameEdit: Binding<Bool> {
+        Binding<Bool> {
+            // 根据gameToEdit状态返回是否触发sheet
+            gameToEdit != nil
+        } set: { newValue in
+            // sheet写入状态时通知gameToEdit改变状态
+            if !newValue {
+                gameToEdit = nil
+            }
+        }
+    }
+    
+
+    
+    func editButton(for game: CodeBreaker) -> some View {
+        Button("Edit", systemImage: "pencil") {
+            gameToEdit = game
+        }
+    }
+    
+    @ViewBuilder
+    var gameEditor: some View {
+        if let gameToEdit {
+            let copyGameEdit = CodeBreaker(name: gameToEdit.name, pegsChoise: gameToEdit.pegsChoise)
+            GameEditor(game: gameToEdit) {
+                if let index = games.firstIndex(of: gameToEdit) {
+                    // 编辑已存在的CodeBreak
+                    games[index] = copyGameEdit
+                }else {
+                    // 新增的CodeBreak
+                    games.insert(gameToEdit, at: 0)
+                }
+            }
+        }
     }
     
     func deleteButton(game: CodeBreaker) -> some View {
@@ -61,6 +111,7 @@ struct GameList: View {
             }
         }
     }
+    
     
     func addSamplesGame() {
         guard games.isEmpty else {

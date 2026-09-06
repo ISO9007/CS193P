@@ -19,14 +19,6 @@ struct CodeBreakerView: View {
     
     // MARK: - body
     var body: some View {
-        TextField("", text: .constant(""))
-            .autocapitalization(.allCharacters)
-            .textInputAutocapitalization(.characters)
-            .autocorrectionDisabled(false)
-            .onSubmit {
-                
-            }
-            
         VStack {
             CodeView(code: game.masterCode)
             ScrollView {
@@ -56,6 +48,7 @@ struct CodeBreakerView: View {
                     .frame(maxHeight: 100)
             }
         }
+        .trackElapsedTime(in: game)
         .padding()
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -63,7 +56,7 @@ struct CodeBreakerView: View {
                     .labelStyle(.automatic)// Button标题或图标显示样式, 默认是automatic
             }
             ToolbarItem {
-                ElapsedTimeView(startTime: game.startTime, endTime: game.endTime)
+                ElapsedTimeView(startTime: game.startTime, endTime: game.endTime, elapsedTime: game.elapsedTime)
                     .monospaced() // 等宽
                     .lineLimit(1) // 限制一行, 只有等宽文本会换行.
             }
@@ -98,6 +91,40 @@ struct CodeBreakerView: View {
             }
         }
 
+    }
+}
+extension View {
+    func trackElapsedTime(in game: CodeBreaker) -> some View {
+        self.modifier(ElapsedTimeTracker(game: game))
+    }
+}
+// 将时间逻辑封装ViewModifier
+struct ElapsedTimeTracker: ViewModifier {
+    
+    // MARK: Data in
+    @Environment(\.scenePhase) private var scenePhase
+    
+    let game: CodeBreaker
+    
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: game, { oldValue, newValue in
+                oldValue.elapsedTimePause()
+                newValue.elapsedTimeStart()
+            })
+            .onAppear() {
+                game.elapsedTimeStart()
+            }
+            .onDisappear {
+                game.elapsedTimePause()
+            }
+            .onChange(of: scenePhase, {
+                switch scenePhase {
+                case .active: game.elapsedTimeStart()
+                case .background: game.elapsedTimePause()
+                default: break
+                }
+            })
     }
 }
 
